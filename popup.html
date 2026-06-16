@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="popup.css" />
+    <title>Universal Form Autofill</title>
+  </head>
+  <body>
+    <header class="bar">
+      <div class="mark" aria-hidden="true"></div>
+      <h1>Autofill</h1>
+      <span class="ver">v1.0</span>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab is-active" data-tab="fill" role="tab">Fill</button>
+      <button class="tab" data-tab="data" role="tab">Your data</button>
+    </nav>
+
+    <!-- FILL TAB -->
+    <section class="panel is-active" data-panel="fill">
+      <div class="actions">
+        <button id="fillProfile" class="btn btn-primary">Fill from your data</button>
+        <button id="fillTest" class="btn">Fill with test data</button>
+      </div>
+
+      <label class="toggle">
+        <input type="checkbox" id="overwrite" />
+        <span>Overwrite fields that already have a value</span>
+      </label>
+
+      <button id="scan" class="btn btn-ghost">Scan form (what would be targeted)</button>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <pre id="scanOut" class="scan-out" hidden></pre>
+    </section>
+
+    <!-- DATA TAB -->
+    <section class="panel" data-panel="data">
+      <p class="hint">
+        Your data lives only in this browser. Keys are matched to form fields by
+        label, name, and placeholder — so <code>email</code> fills an
+        "E-mail address" field. Edit as JSON.
+      </p>
+      <textarea id="profileJson" spellcheck="false" aria-label="Profile data as JSON"></textarea>
+      <div class="data-actions">
+        <button id="saveData" class="btn btn-primary">Save</button>
+        <button id="loadSample" class="btn btn-ghost">Load sample</button>
+      </div>
+      <p id="dataStatus" class="status"></p>
+
+      <details class="adv">
+        <summary>Advanced: pin a value to an exact field</summary>
+        <p class="hint">
+          For stubborn fields, add a <code>"__selectors__"</code> object mapping
+          a CSS selector to a value. These run first and always win.
+        </p>
+        <pre class="example">{
+  "email": "me@example.com",
+  "__selectors__": {
+    "#national_id": "012345678",
+    "select[name='province']": "Phnom Penh"
+  }
+}</pre>
+      </details>
+    </section>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,523 @@
+{
+  "company_name": "YI DA MANUFACTURER CO., LTD.",
+  "company_name_khmer": "ក្រុមហ៊ុន យី ដា ម៉ានូហ្វេកឈើរ័រ ឯ.ក",
+  "address": "Ruessei Srok Village, Chheu Teal Commune, Kien Svay District, Kandal Province",
+  "address_khmer": "ភូមិឫស្សីស្រុក ឃុំឈើទាល ស្រុកគៀនស្វាយ ខេត្តកណ្តាល",
+  "inspection_site": "Factory YI DA MANUFACTURER CO., LTD.",
+  "inspection_site_khmer": "រោងចក្រ ក្រុមហ៊ុន យី ដា ម៉ានូហ្វេកឈើរ័រ ឯ.ក",
+  "reference_letter_date": "2025-09-17",
+  "authority": "Ministry of Industry, Science, Technology & Innovation (Cambodia)",
+  "authority_khmer": "ក្រសួងឧស្សាហកម្ម វិទ្យាសាស្ត្រ បច្ចេកវិទ្យា និងនវានុវត្តន៍",
+  "inspected_equipments": [
+    {
+      "equipment_type": "Forklift (4)",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ ( forklift ) (៤)",
+      "specifications": {
+        "model": "TF15-40",
+        "serial_no": "M160414092AF",
+        "type_of_forklift": "ELECTRIC FORKLIFT (48V)",
+        "rated_capacity": "1500 kg",
+        "load_center": "500 mm",
+        "lifting_height": "4000 mm",
+        "mark": "T-LIFT",
+        "year_of_manufacturing": "N/A",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Forklift (5)",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ ( forklift ) (៥)",
+      "specifications": {
+        "model": "CQD18-GE2RLI",
+        "serial_no": "07018DH1623",
+        "type_of_forklift": "ELECTRIC FORKLIFT (48V)",
+        "rated_capacity": "1800 kg",
+        "load_center": "500 mm",
+        "lifting_height": "4000 mm",
+        "mark": "HELI",
+        "year_of_manufacturing": "2022",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Forklift (6)",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ ( forklift ) (៦)",
+      "specifications": {
+        "model": "CQD18-GE2RLI",
+        "serial_no": "07018DH1624",
+        "type_of_forklift": "ELECTRIC FORKLIFT (48V)",
+        "rated_capacity": "1800 kg",
+        "load_center": "500 mm",
+        "lifting_height": "4000 mm",
+        "mark": "HELI",
+        "year_of_manufacturing": "2022",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Forklift (7)",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ ( forklift ) (៧)",
+      "specifications": {
+        "model": "CPD25-HA2",
+        "serial_no": "05025DK3447",
+        "type_of_forklift": "ELECTRIC FORKLIFT (48V)",
+        "rated_capacity": "2500 kg",
+        "load_center": "500 mm",
+        "lifting_height": "4000 mm",
+        "mark": "HELI",
+        "year_of_manufacturing": "2023",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Forklift (8) / Electric Stacker",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ (៨) / អាបូឡឺអគ្គិសនី",
+      "specifications": {
+        "model": "CDD15J",
+        "serial_no": "08015JEB138",
+        "type_of_equipment": "ELECTRIC STACKER (24V)",
+        "rated_capacity": "1500 kg",
+        "load_center": "500 mm",
+        "lifting_height": "4600 mm",
+        "mark": "HELI",
+        "year_of_manufacturing": "2024",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Forklift (9) / Pallet Mover",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ (៩) / ប្រដាប់អូសទំនិញ",
+      "specifications": {
+        "model": "CBD15-Y-170A",
+        "serial_no": "080157BD241",
+        "type_of_equipment": "PALLET MOVER (24V)",
+        "rated_capacity": "1500 kg",
+        "load_center": "500 mm",
+        "lifting_height": "200 mm",
+        "mark": "HELI",
+        "year_of_manufacturing": "2024",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Forklift (10) / Pallet Mover",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ (១០) / ប្រដាប់អូសទំនិញ",
+      "specifications": {
+        "model": "CBD15-Y-170A",
+        "serial_no": "080157BD259",
+        "type_of_equipment": "PALLET MOVER (24V)",
+        "rated_capacity": "1500 kg",
+        "load_center": "500 mm",
+        "lifting_height": "200 mm",
+        "mark": "HELI",
+        "year_of_manufacturing": "2024",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Forklift (11) / Pallet Mover",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ (១១) / ប្រដាប់អូសទំនិញ",
+      "specifications": {
+        "model": "CBD15-Y-170A",
+        "serial_no": "080157BD241",
+        "type_of_equipment": "PALLET MOVER (24V)",
+        "rated_capacity": "1500 kg",
+        "load_center": "500 mm",
+        "lifting_height": "200 mm",
+        "mark": "HELI",
+        "year_of_manufacturing": "2024",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Freight Elevator (1)",
+      "equipment_type_khmer": "ជណ្តើរយន្តដឹកទំនិញ (១)",
+      "specifications": {
+        "model": "YTVF160M3-4",
+        "serial_no": "255785",
+        "type_of_freight_elevator": "GEARED TRACTION",
+        "motor": "15 kW",
+        "rated_capacity": "3000 kg",
+        "lifting_speed": "N/A",
+        "mark": "FOSHAN",
+        "year_of_manufacturing": "2014",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Freight Elevator (2)",
+      "equipment_type_khmer": "ជណ្តើរយន្តដឹកទំនិញ (២)",
+      "specifications": {
+        "model": "YTVF160M3-4",
+        "serial_no": "255791",
+        "type_of_freight_elevator": "GEARED TRACTION",
+        "motor": "15 kW",
+        "rated_capacity": "3000 kg",
+        "lifting_speed": "N/A",
+        "mark": "FOSHAN",
+        "year_of_manufacturing": "2014",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Freight Elevator (3)",
+      "equipment_type_khmer": "ជណ្តើរយន្តដឹកទំនិញ (៣)",
+      "specifications": {
+        "model": "YTVF160M3-4",
+        "serial_no": "016452",
+        "type_of_freight_elevator": "GEARED TRACTION",
+        "motor": "15 kW",
+        "rated_capacity": "3000 kg",
+        "lifting_speed": "N/A",
+        "mark": "FOSHAN",
+        "year_of_manufacturing": "2014",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (11)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (១១)",
+      "specifications": {
+        "model": "FVS-570",
+        "serial_no": "2116142422",
+        "active_power": "500 kW",
+        "apparent_power": "625 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "VOLVO PENTA",
+        "year_of_manufacturing": "2021",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Air Compressor (1)",
+      "equipment_type_khmer": "ម៉ាស៊ីនសប់ខ្យល់ (១)",
+      "specifications": {
+        "model": "BMVF75",
+        "serial_no": "752109068",
+        "type_of_air_compressor": "ROTARY SCREW",
+        "motor": "75 kW",
+        "max_working_pressure": "1.0 MPa",
+        "rated_speed_capacity": "3000 r/min / 12.5 m³/min",
+        "mark": "KAISHAN",
+        "year_of_manufacturing": "2021",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Air Compressor (2)",
+      "equipment_type_khmer": "ម៉ាស៊ីនសប់ខ្យល់ (២)",
+      "specifications": {
+        "model": "BMVF75",
+        "serial_no": "752106041",
+        "type_of_air_compressor": "ROTARY SCREW",
+        "motor": "75 kW",
+        "max_working_pressure": "1.0 MPa",
+        "rated_speed_capacity": "3000 r/min / 12.5 m³/min",
+        "mark": "KAISHAN",
+        "year_of_manufacturing": "2021",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Air Compressor (3)",
+      "equipment_type_khmer": "ម៉ាស៊ីនសប់ខ្យល់ (៣)",
+      "specifications": {
+        "model": "BMVF75",
+        "serial_no": "752102051",
+        "type_of_air_compressor": "ROTARY SCREW",
+        "motor": "75 kW",
+        "max_working_pressure": "1.0 MPa",
+        "rated_speed_capacity": "3000 r/min / 12.5 m³/min",
+        "mark": "KAISHAN",
+        "year_of_manufacturing": "2021",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Air Compressor (4)",
+      "equipment_type_khmer": "ម៉ាស៊ីនសប់ខ្យល់ (៤)",
+      "specifications": {
+        "model": "PMFV75A",
+        "serial_no": "751906815",
+        "type_of_air_compressor": "ROTARY SCREW",
+        "motor": "75 kW",
+        "max_working_pressure": "0.85 MPa",
+        "rated_speed_capacity": "2975 r/min / 14.2 m³/min",
+        "mark": "KAISHAN",
+        "year_of_manufacturing": "2019",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Air Compressor (5)",
+      "equipment_type_khmer": "ម៉ាស៊ីនសប់ខ្យល់ (៥)",
+      "specifications": {
+        "model": "BMVF75",
+        "serial_no": "752102053",
+        "type_of_air_compressor": "ROTARY SCREW",
+        "motor": "75 kW",
+        "max_working_pressure": "1.0 MPa",
+        "rated_speed_capacity": "3000 r/min / 12.5 m³/min",
+        "mark": "KAISHAN",
+        "year_of_manufacturing": "2021",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Air Compressor (6)",
+      "equipment_type_khmer": "ម៉ាស៊ីនសប់ខ្យល់ (៦)",
+      "specifications": {
+        "model": "BMVF75",
+        "serial_no": "752305016",
+        "type_of_air_compressor": "ROTARY SCREW",
+        "motor": "75 kW",
+        "max_working_pressure": "0.8 MPa",
+        "rated_speed_capacity": "3000 r/min / 12.5 m³/min",
+        "mark": "KAISHAN",
+        "year_of_manufacturing": "2023",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Air Compressor (7)",
+      "equipment_type_khmer": "ម៉ាស៊ីនសប់ខ្យល់ (៧)",
+      "specifications": {
+        "model": "BMVF75",
+        "serial_no": "752310010",
+        "type_of_air_compressor": "ROTARY SCREW",
+        "motor": "75 kW",
+        "max_working_pressure": "0.7 MPa",
+        "rated_speed_capacity": "3000 r/min / 12.5 m³/min",
+        "mark": "KAISHAN",
+        "year_of_manufacturing": "2023",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Forklift (1)",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ ( forklift ) (១)",
+      "specifications": {
+        "model/type": "8FBRS20",
+        "frame_no": "8FBRS20-10926",
+        "type_of_forklift": "ELECTRIC FORKLIFT (48V)",
+        "rated_capacity": "1200 kg",
+        "load_center": "500 mm",
+        "lifting_height": "7000 mm",
+        "mark": "TOYOTA",
+        "year_of_manufacturing": "2020",
+        "made_in": "JAPAN"
+      }
+    },
+    {
+      "equipment_type": "Forklift (2)",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ ( forklift ) (២)",
+      "specifications": {
+        "model": "8FBRS20",
+        "frame_no": "8FBRS20-10830",
+        "type_of_forklift": "ELECTRIC FORKLIFT (48V)",
+        "rated_capacity": "1200 kg",
+        "load_center": "500 mm",
+        "lifting_height": "7000 mm",
+        "mark": "TOYOTA",
+        "year_of_manufacturing": "2019",
+        "made_in": "JAPAN"
+      }
+    },
+    {
+      "equipment_type": "Forklift (3)",
+      "equipment_type_khmer": "ឡានស្ទូចលើកទំនិញ ( forklift ) (៣)",
+      "specifications": {
+        "model": "8FBN25",
+        "frame_no": "8FBN25-33422",
+        "type_of_forklift": "ELECTRIC FORKLIFT (48V)",
+        "rated_capacity": "2300 kg",
+        "load_center": "500 mm",
+        "lifting_height": "4300 mm",
+        "mark": "TOYOTA",
+        "year_of_manufacturing": "2019",
+        "made_in": "JAPAN"
+      }
+    },
+    {
+      "equipment_type": "Generator (8)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (៨)",
+      "specifications": {
+        "frame_core": "P1734A1",
+        "serial_no": "X09H350034",
+        "active_power": "1008 kW",
+        "apparent_power": "1260 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "STAMFORD",
+        "year_of_manufacturing": "N/A",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (9)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (៩)",
+      "specifications": {
+        "model": "FVS-570",
+        "serial_no": "2116142423",
+        "active_power": "500 kW",
+        "apparent_power": "625 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "VOLVO PENTA",
+        "year_of_manufacturing": "2021",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (10)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (១០)",
+      "specifications": {
+        "model": "FVS-570",
+        "serial_no": "2116142503",
+        "active_power": "500 kW",
+        "apparent_power": "625 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "VOLVO PENTA",
+        "year_of_manufacturing": "2021",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Steam Boiler",
+      "equipment_type_khmer": "ឆ្នាំងដុតស្ទីម ( ឡចំហាយ )",
+      "specifications": {
+        "model": "SZG10-1.25-M",
+        "product_no": "201409-2534",
+        "type_of_steam_boiler": "HORIZONTAL",
+        "steam_capacity": "10 t/h",
+        "max_working_pressure": "1.25 MPa",
+        "type_of_fuel": "FIREWOOD",
+        "mark": "N/A",
+        "year_of_manufacturing": "2014",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (1)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (១)",
+      "specifications": {
+        "model": "TCM-1250E",
+        "serial_no": "TPS01FJ180971",
+        "active_power": "1000 kW",
+        "apparent_power": "1250 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "TIDE POWER",
+        "year_of_manufacturing": "2018",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (2)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (២)",
+      "specifications": {
+        "model": "MX-1030-4",
+        "serial_no": "7421-100047",
+        "active_power": "1030 kW",
+        "apparent_power": "1287.5 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "MAGNAMAX",
+        "year_of_manufacturing": "N/A",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (3)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (៣)",
+      "specifications": {
+        "model": "MX-1030-4",
+        "serial_no": "7421-07004",
+        "active_power": "1030 kW",
+        "apparent_power": "1287.5 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "MAGNAMAX",
+        "year_of_manufacturing": "N/A",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (4)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (៤)",
+      "specifications": {
+        "model": "354F",
+        "serial_no": "24073019",
+        "active_power": "500 kW",
+        "apparent_power": "625 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "BRUSHLESS",
+        "year_of_manufacturing": "2024",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (5)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (៥)",
+      "specifications": {
+        "model": "VF-150C",
+        "engine": "TAD731GE",
+        "active_power": "132 kW",
+        "apparent_power": "165 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "VOLVO PENTA",
+        "year_of_manufacturing": "2015",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (6)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (៦)",
+      "specifications": {
+        "frame_core": "P1734A1",
+        "serial_no": "X128085713",
+        "active_power": "1008 kW",
+        "apparent_power": "1260 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "STAMFORD",
+        "year_of_manufacturing": "N/A",
+        "made_in": "CHINA"
+      }
+    },
+    {
+      "equipment_type": "Generator (7)",
+      "equipment_type_khmer": "ម៉ាស៊ីនភ្លើង (៧)",
+      "specifications": {
+        "type": "D2840LE201",
+        "serial_no": "46432868023277",
+        "active_power": "496 kW",
+        "apparent_power": "620 kVA",
+        "rated_speed": "1500 r/min",
+        "type_of_fuel": "DIESEL",
+        "mark": "MAN",
+        "year_of_manufacturing": "2012",
+        "made_in": "GERMANY"
+      }
+    },
+    {
+      "equipment_type": "Freight Elevator (4)",
+      "equipment_type_khmer": "ជណ្តើរយន្តដឹកទំនិញ (៤)",
+      "specifications": {
+        "model": "YTVF160M3-4",
+        "serial_no": "195093",
+        "type_of_freight_elevator": "GEARED TRACTION",
+        "motor": "15 kW",
+        "rated_capacity": "3000 kg",
+        "lifting_speed": "N/A",
+        "mark": "FOSHAN",
+        "year_of_manufacturing": "2014",
+        "made_in": "CHINA"
+      }
+    }
+  ]
+}

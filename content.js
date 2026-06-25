@@ -248,7 +248,7 @@
   /* --------------------------- test data -------------------------------- */
 
   const SAMPLE = {
-    text: "Sample Text",
+    text: "123",
     email: "test.user@example.com",
     tel: "+15551234567",
     url: "https://example.com",
@@ -536,11 +536,19 @@
     return bytes;
   };
 
+  // A short, unguessable token used to make every synthesized file unique, so
+  // we never hand the same bytes/name to the server twice.
+  const randToken = () =>
+    (Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(0, 12);
+
   // Build a placeholder File whose type/extension respects the input's `accept`
-  // and whose name is derived from the field's label so it's recognizable.
+  // and whose name is derived from the field's label so it's recognizable. Both
+  // the name and the bytes carry a random token so no two uploads are identical
+  // — portals that dedupe by filename or content hash see a fresh file each time.
   const makeSampleFile = (el) => {
     const accept = (el.getAttribute("accept") || "").toLowerCase();
     const wantsImage = /image\/|\.png|\.jpe?g|\.gif|\.webp|\.bmp/.test(accept);
+    const token = randToken();
     const base =
       (describeField(el)[0] || el.name || el.id || "sample")
         .toString()
@@ -549,9 +557,19 @@
         .replace(/[^\w.-]/g, "")
         .slice(0, 40) || "sample";
     if (wantsImage) {
-      return new File([b64ToBytes(PNG_1PX_B64)], `${base}.png`, { type: "image/png" });
+      // Append the token after IEND; decoders stop at IEND so the image stays
+      // valid while the file's bytes (and hash) differ every time.
+      const png = b64ToBytes(PNG_1PX_B64);
+      const tag = new TextEncoder().encode(`\n${token}`);
+      const bytes = new Uint8Array(png.length + tag.length);
+      bytes.set(png, 0);
+      bytes.set(tag, png.length);
+      return new File([bytes], `${base}_${token}.png`, { type: "image/png" });
     }
-    return new File([new Blob([MINIMAL_PDF])], `${base}.pdf`, { type: "application/pdf" });
+    // PDF comments (lines starting with %) are ignored by readers, so the token
+    // is a valid, invisible payload that still changes the bytes.
+    const pdf = MINIMAL_PDF.replace("%%EOF", `%${token}\n%%EOF`);
+    return new File([new Blob([pdf])], `${base}_${token}.pdf`, { type: "application/pdf" });
   };
 
   const fillFileInput = (el) => {

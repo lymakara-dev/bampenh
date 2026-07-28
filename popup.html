@@ -15,6 +15,7 @@
 
     <nav class="tabs" role="tablist">
       <button class="tab is-active" data-tab="fill" role="tab">Fill</button>
+      <button class="tab" data-tab="suggest" role="tab">Suggest</button>
       <button class="tab" data-tab="data" role="tab">Your data</button>
     </nav>
 
@@ -30,10 +31,31 @@
         <span>Overwrite fields that already have a value</span>
       </label>
 
+      <button id="clear" class="btn btn-danger">Clear all fields on the page</button>
       <button id="scan" class="btn btn-ghost">Scan form (what would be targeted)</button>
 
       <div id="status" class="status" role="status" aria-live="polite"></div>
       <pre id="scanOut" class="scan-out" hidden></pre>
+    </section>
+
+    <!-- SUGGEST TAB -->
+    <section class="panel" data-panel="suggest">
+      <p class="hint">
+        Reads the current page, analyzes every input, and proposes a sample
+        value for each. Review or edit them, then apply.
+      </p>
+      <button id="analyze" class="btn btn-primary" style="width: 100%">
+        Analyze this page
+      </button>
+
+      <div id="suggestStatus" class="status" role="status" aria-live="polite"></div>
+
+      <div id="suggestList" class="suggest-list" hidden></div>
+
+      <div id="suggestApplyBar" class="data-actions" hidden>
+        <button id="applySuggestions" class="btn btn-primary">Apply all</button>
+        <button id="reanalyze" class="btn btn-ghost">Re-analyze</button>
+      </div>
     </section>
 
     <!-- DATA TAB -->

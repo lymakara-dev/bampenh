@@ -1,25 +1,19 @@
 /* Universal Form Autofill — popup controller */
 
-const SAMPLE_PROFILE = {
-  title: "Mr",
-  firstName: "Alex",
-  lastName: "Morgan",
-  fullName: "Alex Morgan",
-  email: "alex.morgan@example.com",
-  phone: "+15551234567",
-  company: "Example Co.",
-  occupation: "Software Engineer",
-  address: "123 Main Street",
-  address2: "Apt 4B",
-  city: "Phnom Penh",
-  state: "Phnom Penh",
-  zip: "12000",
-  country: "Cambodia",
-  dob: "1990-05-14",
-  gender: "Male",
-  nationalId: "012345678",
-  website: "https://example.com",
-};
+// The sample profile is loaded from the packaged sample-data.json so that file
+// is the single source of truth. Fetched once from the extension bundle (the
+// popup is an extension page, so it can read its own packaged files) and cached.
+let sampleProfileCache = null;
+async function getSampleProfile() {
+  if (sampleProfileCache) return sampleProfileCache;
+  try {
+    const res = await fetch(chrome.runtime.getURL("sample-data.json"));
+    sampleProfileCache = await res.json();
+  } catch (_) {
+    sampleProfileCache = {}; // missing/invalid file — fall back to empty sample
+  }
+  return sampleProfileCache;
+}
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -36,7 +30,7 @@ document.querySelectorAll(".tab").forEach((tab) => {
 /* ------------------------- data storage ------------------------------ */
 async function loadProfile() {
   const { profile } = await chrome.storage.local.get("profile");
-  $("#profileJson").value = JSON.stringify(profile || SAMPLE_PROFILE, null, 2);
+  $("#profileJson").value = JSON.stringify(profile || (await getSampleProfile()), null, 2);
 }
 
 $("#saveData").addEventListener("click", async () => {
@@ -52,8 +46,8 @@ $("#saveData").addEventListener("click", async () => {
   }
 });
 
-$("#loadSample").addEventListener("click", () => {
-  $("#profileJson").value = JSON.stringify(SAMPLE_PROFILE, null, 2);
+$("#loadSample").addEventListener("click", async () => {
+  $("#profileJson").value = JSON.stringify(await getSampleProfile(), null, 2);
   $("#dataStatus").textContent = "Sample loaded — edit, then Save.";
   $("#dataStatus").className = "status";
 });
@@ -87,10 +81,66 @@ function setStatus(text, kind) {
   el.className = "status" + (kind ? " " + kind : "");
 }
 
+/* ------------------- MISTI SSI145 adapter (special-cased) ------------- */
+// This form's labels are Khmer-only text with no stable name/id attributes,
+// so the generic label-matching engine in content.js can never score a
+// match. Instead we inject an adapter that writes straight into the page's
+// Vue component state — see forms/misti-ssi145.js for the full rationale.
+function isMistiSSI145(url) {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.hostname === "services.misti.dev" && /GD_IND_SSI145/.test(u.pathname);
+  } catch (_) {
+    return false;
+  }
+}
+
+async function fillMistiSSI145(tab, mode) {
+  await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    world: "MAIN",
+    files: ["forms/misti-ssi145.js"],
+  });
+
+  let profileArg = null;
+  if (mode === "profile") {
+    try {
+      const { profile } = await chrome.storage.local.get("profile");
+      if (profile && profile.applicant && profile.application) profileArg = profile;
+    } catch (_) {}
+  }
+
+  const [{ result } = {}] = await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    world: "MAIN",
+    func: (p) => window.__bampenhFillSSI145(p),
+    args: [profileArg],
+  });
+  return result;
+}
+
 /* ----------------------------- actions ------------------------------- */
 async function doFill(mode) {
   setStatus("Working…");
   $("#scanOut").hidden = true;
+
+  const tab = await activeTab();
+  if (isMistiSSI145(tab && tab.url)) {
+    try {
+      const res = await fillMistiSSI145(tab, mode);
+      if (!res || !res.ok) throw new Error((res && res.error) || "No response from page.");
+      const eq = res.filled.equipmentTypes.length;
+      setStatus(
+        `Filled applicant, location, owner/representative, attachments${eq ? `, and ${eq} equipment type(s)` : ""}.`,
+        "good"
+      );
+    } catch (e) {
+      setStatus(e.message, "bad");
+    }
+    return;
+  }
+
   let profile = {};
   try {
     const { profile: saved } = await chrome.storage.local.get("profile");
@@ -120,6 +170,18 @@ async function doFill(mode) {
 $("#fillProfile").addEventListener("click", () => doFill("profile"));
 $("#fillTest").addEventListener("click", () => doFill("test"));
 
+$("#clear").addEventListener("click", async () => {
+  setStatus("Clearing…");
+  $("#scanOut").hidden = true;
+  try {
+    const res = await sendToPage({ action: "clear" });
+    if (!res || !res.ok) throw new Error((res && res.error) || "No response from page.");
+    setStatus(`Cleared ${res.cleared} field(s).`, "good");
+  } catch (e) {
+    setStatus(e.message, "bad");
+  }
+});
+
 $("#scan").addEventListener("click", async () => {
   setStatus("Scanning…");
   try {
@@ -140,6 +202,91 @@ $("#scan").addEventListener("click", async () => {
     setStatus(e.message, "bad");
   }
 });
+
+/* --------------------------- suggest flow ---------------------------- */
+// Tracks the analyzed fields so "Apply all" can read each row's (edited) value.
+let suggestedFields = [];
+
+function setSuggestStatus(text, kind) {
+  const el = $("#suggestStatus");
+  el.textContent = text;
+  el.className = "status" + (kind ? " " + kind : "");
+}
+
+function renderSuggestions(fields) {
+  suggestedFields = fields;
+  const list = $("#suggestList");
+  list.innerHTML = "";
+
+  if (!fields.length) {
+    list.hidden = true;
+    $("#suggestApplyBar").hidden = true;
+    return;
+  }
+
+  for (const f of fields) {
+    const row = document.createElement("div");
+    row.className = "sg-row";
+
+    const head = document.createElement("div");
+    head.className = "sg-head";
+    head.innerHTML = `<span class="sg-label"></span><span class="sg-tag">${
+      f.category || f.type || f.tag
+    }</span>`;
+    head.querySelector(".sg-label").textContent = f.label;
+
+    const input = document.createElement("input");
+    input.className = "sg-input";
+    input.type = "text";
+    input.value = f.value;
+    input.dataset.uid = f.uid;
+
+    row.appendChild(head);
+    row.appendChild(input);
+    list.appendChild(row);
+  }
+  list.hidden = false;
+  $("#suggestApplyBar").hidden = false;
+}
+
+async function analyzePage() {
+  setSuggestStatus("Reading page…");
+  $("#suggestList").hidden = true;
+  $("#suggestApplyBar").hidden = true;
+  try {
+    const res = await sendToPage({ action: "suggest" });
+    if (!res || !res.ok) throw new Error((res && res.error) || "No response from page.");
+    if (!res.count) {
+      setSuggestStatus("No fillable fields found on this page.", "bad");
+      renderSuggestions([]);
+      return;
+    }
+    setSuggestStatus(`Analyzed ${res.count} field(s). Review and apply.`, "good");
+    renderSuggestions(res.fields);
+  } catch (e) {
+    setSuggestStatus(e.message, "bad");
+  }
+}
+
+async function applySuggestions() {
+  const inputs = document.querySelectorAll("#suggestList .sg-input");
+  const values = {};
+  inputs.forEach((inp) => {
+    values[inp.dataset.uid] = inp.value;
+  });
+  setSuggestStatus("Applying…");
+  try {
+    const res = await sendToPage({ action: "applySuggestions", values });
+    if (!res || !res.ok) throw new Error((res && res.error) || "No response from page.");
+    setSuggestStatus(`Filled ${res.filled} field(s). Skipped ${res.skipped}.`, "good");
+  } catch (e) {
+    setSuggestStatus(e.message, "bad");
+  }
+}
+
+$("#analyze").addEventListener("click", analyzePage);
+$("#reanalyze").addEventListener("click", analyzePage);
+$("#applySuggestions").addEventListener("click", applySuggestions);
 
 /* ------------------------------ init --------------------------------- */
 loadProfile();

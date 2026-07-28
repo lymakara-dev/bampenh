@@ -81,26 +81,32 @@ function setStatus(text, kind) {
   el.className = "status" + (kind ? " " + kind : "");
 }
 
-/* ------------------- MISTI SSI145 adapter (special-cased) ------------- */
-// This form's labels are Khmer-only text with no stable name/id attributes,
-// so the generic label-matching engine in content.js can never score a
-// match. Instead we inject an adapter that writes straight into the page's
-// Vue component state — see forms/misti-ssi145.js for the full rationale.
-function isMistiSSI145(url) {
-  if (!url) return false;
+/* ------------------- MISTI form adapters (special-cased) --------------- */
+// MISTI's draft-application forms render Khmer-only labels with no stable
+// name/id attributes, so the generic label-matching engine in content.js can
+// never score a match. Instead we inject an adapter that writes straight
+// into the page's Vue component state. GD_IND_SSI145 gets a hand-mapped
+// adapter (forms/misti-ssi145.js); every other GD_IND_* form (there are 7,
+// listed under services.misti.dev/portal/home/GD_IND_SERVICES) is covered by
+// a schema-agnostic one (forms/misti-generic.js) that fills whatever shape
+// it finds by structural pattern + key-name heuristics.
+function mistiFormHash(url) {
+  if (!url) return null;
   try {
     const u = new URL(url);
-    return u.hostname === "services.misti.dev" && /GD_IND_SSI145/.test(u.pathname);
+    if (u.hostname !== "services.misti.dev") return null;
+    const m = u.pathname.match(/\/draft_applications\/new\/([^/?]+)/);
+    return m ? m[1] : null;
   } catch (_) {
-    return false;
+    return null;
   }
 }
 
-async function fillMistiSSI145(tab, mode) {
+async function fillMistiForm(tab, mode, file, fnName) {
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     world: "MAIN",
-    files: ["forms/misti-ssi145.js"],
+    files: [file],
   });
 
   let profileArg = null;
@@ -114,8 +120,8 @@ async function fillMistiSSI145(tab, mode) {
   const [{ result } = {}] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     world: "MAIN",
-    func: (p) => window.__bampenhFillSSI145(p),
-    args: [profileArg],
+    func: (name, p) => window[name](p),
+    args: [fnName, profileArg],
   });
   return result;
 }
@@ -126,15 +132,27 @@ async function doFill(mode) {
   $("#scanOut").hidden = true;
 
   const tab = await activeTab();
-  if (isMistiSSI145(tab && tab.url)) {
+  const formHash = mistiFormHash(tab && tab.url);
+  if (formHash) {
+    const isSSI145 = formHash === "GD_IND_SSI145";
+    const file = isSSI145 ? "forms/misti-ssi145.js" : "forms/misti-generic.js";
+    const fnName = isSSI145 ? "__bampenhFillSSI145" : "__bampenhFillMistiGeneric";
     try {
-      const res = await fillMistiSSI145(tab, mode);
+      const res = await fillMistiForm(tab, mode, file, fnName);
       if (!res || !res.ok) throw new Error((res && res.error) || "No response from page.");
-      const eq = res.filled.equipmentTypes.length;
-      setStatus(
-        `Filled applicant, location, owner/representative, attachments${eq ? `, and ${eq} equipment type(s)` : ""}.`,
-        "good"
-      );
+      if (isSSI145) {
+        const eq = res.filled.equipmentTypes.length;
+        setStatus(
+          `Filled applicant, location, owner/representative, attachments${eq ? `, and ${eq} equipment type(s)` : ""}.`,
+          "good"
+        );
+      } else {
+        const { fields, attachments, locations, lists } = res.filled;
+        setStatus(
+          `Filled ${fields} field(s), ${attachments} attachment(s), ${locations} location block(s), ${lists} list row(s).`,
+          "good"
+        );
+      }
     } catch (e) {
       setStatus(e.message, "bad");
     }

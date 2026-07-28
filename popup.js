@@ -81,10 +81,66 @@ function setStatus(text, kind) {
   el.className = "status" + (kind ? " " + kind : "");
 }
 
+/* ------------------- MISTI SSI145 adapter (special-cased) ------------- */
+// This form's labels are Khmer-only text with no stable name/id attributes,
+// so the generic label-matching engine in content.js can never score a
+// match. Instead we inject an adapter that writes straight into the page's
+// Vue component state — see forms/misti-ssi145.js for the full rationale.
+function isMistiSSI145(url) {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.hostname === "services.misti.dev" && /GD_IND_SSI145/.test(u.pathname);
+  } catch (_) {
+    return false;
+  }
+}
+
+async function fillMistiSSI145(tab, mode) {
+  await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    world: "MAIN",
+    files: ["forms/misti-ssi145.js"],
+  });
+
+  let profileArg = null;
+  if (mode === "profile") {
+    try {
+      const { profile } = await chrome.storage.local.get("profile");
+      if (profile && profile.applicant && profile.application) profileArg = profile;
+    } catch (_) {}
+  }
+
+  const [{ result } = {}] = await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    world: "MAIN",
+    func: (p) => window.__bampenhFillSSI145(p),
+    args: [profileArg],
+  });
+  return result;
+}
+
 /* ----------------------------- actions ------------------------------- */
 async function doFill(mode) {
   setStatus("Working…");
   $("#scanOut").hidden = true;
+
+  const tab = await activeTab();
+  if (isMistiSSI145(tab && tab.url)) {
+    try {
+      const res = await fillMistiSSI145(tab, mode);
+      if (!res || !res.ok) throw new Error((res && res.error) || "No response from page.");
+      const eq = res.filled.equipmentTypes.length;
+      setStatus(
+        `Filled applicant, location, owner/representative, attachments${eq ? `, and ${eq} equipment type(s)` : ""}.`,
+        "good"
+      );
+    } catch (e) {
+      setStatus(e.message, "bad");
+    }
+    return;
+  }
+
   let profile = {};
   try {
     const { profile: saved } = await chrome.storage.local.get("profile");

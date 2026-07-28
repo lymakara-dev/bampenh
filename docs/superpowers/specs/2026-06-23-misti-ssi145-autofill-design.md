@@ -1,8 +1,28 @@
 # MISTI SSI145 Autofill Adapter — Design
 
 **Date:** 2026-06-23
-**Status:** Draft for review
+**Status:** Superseded — see note below
 **Target form:** `https://services.misti.dev/portal/draft_applications/new/GD_IND_SSI145?service_code=7`
+
+> **2026-07-28 update:** The DOM-driving approach below (label-map, `.csel`
+> widget driver, calendar clicking) was replaced before implementation. Poking
+> around the live page found the form is a single Vue 2 component
+> (`$options.name === "GD_IND_SSI145"`) reachable from any DOM node's
+> `.__vue__`, whose `$data` shape exactly matches `{ applicant, application:
+> {factory_location, management:{owner,representative}, attachment,
+> technical_equipment}, selectedEquipment }`. Writing straight into that
+> reactive state (in the page's MAIN world, since content scripts share the
+> DOM but not page-realm objects) makes every v-model'd input, dropdown,
+> vue-datetime picker and equipment table update itself — no label matching,
+> `.csel` driving, or calendar-click simulation needed. The only wrinkle:
+> `province_id`/`district_id`/`commune_id`/`village_id` are watched and
+> cascade-reset the level below on change, so those four must be set in
+> order with a settle wait between each (implemented as `fillCascade`), or a
+> later field wipes out the one before it. Implemented in
+> `forms/misti-ssi145.js`, wired up from `popup.js`. The sections below are
+> kept for historical context on the investigation but no longer describe
+> the shipped implementation.
+
 (Cambodia MISTI — "Technical & safety inspection certificate" application for risk-bearing equipment.)
 
 ## 1. Goal

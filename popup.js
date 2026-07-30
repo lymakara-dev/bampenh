@@ -90,11 +90,13 @@ function setStatus(text, kind) {
 // listed under services.misti.dev/portal/home/GD_IND_SERVICES) is covered by
 // a schema-agnostic one (forms/misti-generic.js) that fills whatever shape
 // it finds by structural pattern + key-name heuristics.
+const MISTI_HOSTNAMES = new Set(["services.misti.dev", "localhost", "127.0.0.1"]);
+
 function mistiFormHash(url) {
   if (!url) return null;
   try {
     const u = new URL(url);
-    if (u.hostname !== "services.misti.dev") return null;
+    if (!MISTI_HOSTNAMES.has(u.hostname)) return null;
     const m = u.pathname.match(/\/draft_applications\/new\/([^/?]+)/);
     return m ? m[1] : null;
   } catch (_) {

@@ -20,7 +20,7 @@
   /* ----------------------------- utilities ------------------------------ */
 
   // Lowercase + strip everything that isn't a letter or number.
-  const normalize = (s) => (s || "").toString().toLowerCase().replace(/[^a-z0-9]/g, "");
+  const normalize = (s) => (s || "").toString().toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 
   // Split a string into word tokens, breaking camelCase / snake_case / kebab.
   const tokenize = (s) =>
@@ -138,6 +138,12 @@
     push(el.getAttribute("aria-label"));
     push(el.getAttribute("autocomplete"));
     push(el.getAttribute("title"));
+
+    const container = el.closest('.form-input-container');
+    if (container) {
+      const lbl = container.querySelector('.form-title label');
+      if (lbl) push(lbl.textContent);
+    }
 
     // data-* attributes often carry the real field name in custom apps.
     for (const attr of el.attributes) {

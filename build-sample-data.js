@@ -51,14 +51,16 @@ const generateDummy = (key) => {
   if (kl.includes('fax') || kl.includes('ទូរសារ')) return '023456789';
   if (kl.includes('price') || kl.includes('តម្លៃ')) return '1000';
   if (kl.includes('number') || kl.includes('លេខ')) return '123';
-  return 'ទិន្នន័យសាកល្បង';
+  if (kl.includes('qty') || kl.includes('amount') || kl.includes('total') || kl.includes('employee') || kl.includes('female') || kl.includes('male') || kl.includes('duration') || kl.includes('participant') || kl.includes('area') || kl.includes('building') || kl.includes('capacity') || kl.includes('year') || kl.includes('domestic') || kl.includes('foreign') || kl.includes('sale') || kl.includes('children') || kl.includes('surface')) return '123';
+  if (kl.includes('បរិមាណ') || kl.includes('ចំនួន') || kl.includes('ទឹកប្រាក់') || kl.includes('ឆ្នាំ') || kl.includes('ទំហំ') || kl.includes('អគារ') || kl.includes('បុគ្គលិក') || kl.includes('ស្រី') || kl.includes('ប្រុស') || kl.includes('កុមារ') || kl.includes('រយៈពេល') || kl.includes('តម្លៃ') || kl.includes('ចំណុះ')) return '123';
+  return '12345 ទិន្នន័យសាកល្បង';
 };
 
 for (const m of models) {
-  if (!newData[m]) newData[m] = generateDummy(m);
+  if (!newData[m] || newData[m] === 'ទិន្នន័យសាកល្បង' || newData[m] === '12345 ទិន្នន័យសាកល្បង' || newData[m] === 'ឈ្មោះសាកល្បង') newData[m] = generateDummy(m);
 }
 for (const l of labels) {
-  if (!newData[l]) newData[l] = generateDummy(l);
+  if (!newData[l] || newData[l] === 'ទិន្នន័យសាកល្បង' || newData[l] === 'ឈ្មោះសាកល្បង') newData[l] = generateDummy(l);
 }
 
 fs.writeFileSync(outputJson, JSON.stringify(newData, null, 2));

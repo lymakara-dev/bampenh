@@ -983,7 +983,7 @@
     const haspopup = (el.getAttribute("aria-haspopup") || "").toLowerCase();
     if (haspopup === "listbox" || haspopup === "menu" || haspopup === "true") return true;
     // Library selects: vue-select (.v-select) and Vue Material (.md-select).
-    if (typeof el.closest === "function" && el.closest(".v-select, .md-select, .md-field.md-menu")) {
+    if (typeof el.closest === "function" && el.closest(".v-select, .md-select, .md-field.md-menu, .csel-wrapper, .csel-trigger")) {
       return true;
     }
     return false;
@@ -1004,14 +1004,14 @@
     if (!containers.length) {
       containers = Array.from(
         document.querySelectorAll(
-          '[role="listbox"], [role="menu"], .vs__dropdown-menu, .md-menu-content, .md-select-menu'
+          '[role="listbox"], [role="menu"], .vs__dropdown-menu, .md-menu-content, .md-select-menu, .csel-panel, .country-dropdown'
         )
       ).filter((c) => includeHidden || isVisible(c));
     }
     containers.forEach((c) =>
       out.push(
         ...c.querySelectorAll(
-          '[role="option"], [role="menuitem"], li, .vs__dropdown-option, .md-list-item, [class*="option"]'
+          '[role="option"], [role="menuitem"], li, .vs__dropdown-option, .md-list-item, [class*="option"], .country-item'
         )
       )
     );
@@ -1160,7 +1160,7 @@
     const nodes = Array.from(
       document.querySelectorAll(
         "input, textarea, select, [contenteditable=''], [contenteditable='true']," +
-          "[role='combobox'], [role='listbox'], [aria-haspopup='listbox']"
+          "[role='combobox'], [role='listbox'], [aria-haspopup='listbox'], .csel-trigger"
       )
     );
     return nodes.filter((el) => {

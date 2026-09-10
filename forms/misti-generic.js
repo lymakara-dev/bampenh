@@ -5,10 +5,12 @@
  * 1. Pre-filled comprehensive sample data from window.__bampenhMistiSamples
  *    (harvested directly from all 44 form.js definitions and populated with
  *    valid, realistic test data).
- * 2. Automatic detection of service_form_hash from component or URL path.
- * 3. Reactive deep-merge with cascade setters for address dropdowns
+ * 2. On-demand random conditional data generation from window.__bampenhGenerateRandomSample
+ *    generating realistic branch-consistent data variations per test run.
+ * 3. Automatic detection of service_form_hash from component or URL path.
+ * 4. Reactive deep-merge with cascade setters for address dropdowns
  *    (province_id -> district_id -> commune_id -> village_id).
- * 4. Safety-net recursive walker that fills any remaining unpopulated leaf fields.
+ * 5. Safety-net recursive walker that fills any remaining unpopulated leaf fields.
  *
  * Must run in the MAIN world (chrome.scripting.executeScript world: "MAIN")
  * ========================================================================== */
@@ -27,6 +29,22 @@
     commune: 10302,
     village: "ភូមិ១"
   };
+  const CONDITION_KEYS = [
+    "type",
+    "request_type",
+    "service_option",
+    "cdc",
+    "current_status",
+    "current_situation",
+    "has_representative",
+    "has_previous_branch",
+    "product_type",
+    "license_activity",
+    "company_type",
+    "license_type",
+    "industry_type",
+    "requested_product_type"
+  ];
   const today = () => new Date().toISOString().slice(0, 10);
 
   // Detect Vue component responsible for the form
@@ -180,6 +198,21 @@
   const deepMergeSample = async (target, source, stats) => {
     if (!target || !source) return;
 
+    // First pass: Set condition keys first so Vue watchers and v-if update
+    let changedCondition = false;
+    for (const ck of CONDITION_KEYS) {
+      if (ck in source && source[ck] !== undefined && source[ck] !== null) {
+        if (target[ck] !== source[ck]) {
+          target[ck] = source[ck];
+          stats.fields++;
+          changedCondition = true;
+        }
+      }
+    }
+    if (changedCondition) {
+      await wait(60);
+    }
+
     // Handle location blocks with cascade setter
     if (isLocationBlock(target) && isLocationBlock(source)) {
       for (const k of CASCADE_KEYS) {
@@ -192,7 +225,8 @@
     }
 
     for (const [key, val] of Object.entries(source)) {
-      // Location keys already handled in order
+      // Condition keys and cascade keys already handled
+      if (CONDITION_KEYS.includes(key)) continue;
       if (isLocationBlock(target) && CASCADE_KEYS.includes(key)) continue;
 
       if (val === null || val === undefined) continue;
@@ -202,13 +236,8 @@
           target[key] = JSON.parse(JSON.stringify(val));
           stats.lists++;
         } else {
-          for (let i = 0; i < val.length; i++) {
-            if (i < target[key].length) {
-              await deepMergeSample(target[key][i], val[i], stats);
-            } else {
-              target[key].push(JSON.parse(JSON.stringify(val[i])));
-            }
-          }
+          // Reactively replace array elements in Vue 2
+          target[key].splice(0, target[key].length, ...JSON.parse(JSON.stringify(val)));
           stats.lists++;
         }
         continue;
@@ -273,14 +302,28 @@
 
   const isValidProfile = (p) => !!(p && (p.applicant || p.application));
 
-  window.__bampenhFillMistiGeneric = async (profileOverride, formHashHint) => {
+  window.__bampenhFillMistiGeneric = async (profileOverride, formHashHint, mode = "test") => {
     try {
       const comp = findComponent();
       if (!comp) return { ok: false, error: "Couldn't find a MISTI form component on this page." };
 
       const formHash = detectFormHash(comp, formHashHint);
-      const samplesMap = window.__bampenhMistiSamples || {};
-      const sample = formHash ? samplesMap[formHash] : null;
+      let sample = null;
+
+      // In test mode or when no custom profile is supplied, generate fresh randomized sample
+      if (mode === "test" || !isValidProfile(profileOverride)) {
+        if (typeof window.__bampenhGenerateRandomSample === "function" && formHash) {
+          try {
+            sample = window.__bampenhGenerateRandomSample(formHash);
+          } catch (_) {}
+        }
+      }
+
+      // Fallback to pre-built sample map
+      if (!sample && formHash) {
+        const samplesMap = window.__bampenhMistiSamples || {};
+        sample = samplesMap[formHash];
+      }
 
       const stats = { fields: 0, attachments: 0, locations: 0, lists: 0 };
 
@@ -296,8 +339,8 @@
         // Deep clone sample data
         const sampleCopy = JSON.parse(JSON.stringify(sample));
 
-        // If custom user profile was passed, apply overrides
-        if (isValidProfile(profileOverride)) {
+        // If custom user profile was passed in profile mode, apply overrides
+        if (mode === "profile" && isValidProfile(profileOverride)) {
           if (profileOverride.applicant) {
             sampleCopy.applicant = { ...sampleCopy.applicant, ...profileOverride.applicant };
           }
@@ -314,7 +357,7 @@
           await deepMergeSample(comp.data.application, sampleCopy.application, stats);
         }
       } else {
-        // Fallback when no pre-packaged sample is available
+        // Fallback when no sample is available
         if (isValidProfile(profileOverride)) {
           comp.data.applicant = { ...comp.data.applicant, ...profileOverride.applicant };
           Object.assign(comp.data.application, profileOverride.application);
@@ -337,6 +380,7 @@
       return {
         ok: true,
         formHash: formHash || "GENERIC",
+        mode: mode || "test",
         usedSample: !!sample,
         filled: stats
       };

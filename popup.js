@@ -133,8 +133,8 @@ async function fillMistiForm(tab, mode, file, fnName, formHash) {
   const [{ result } = {}] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     world: "MAIN",
-    func: (name, p, hash) => window[name](p, hash),
-    args: [fnName, profileArg, formHash],
+    func: (name, p, hash, m) => window[name](p, hash, m),
+    args: [fnName, profileArg, formHash, mode],
   });
   return result;
 }

@@ -202,7 +202,7 @@
 
   const isValidProfile = (p) => !!(p && p.applicant && p.application);
 
-  window.__bampenhFillSSI145 = async (profileOverride) => {
+  window.__bampenhFillSSI145 = async (profileOverride, formHashHint, mode = "test") => {
     try {
       const comp = findComponent();
       if (!comp) {

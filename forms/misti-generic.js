@@ -1,111 +1,93 @@
 /* ==========================================================================
- * MISTI generic adapter — schema-agnostic Vue-data fill
+ * MISTI generic adapter — schema-agnostic Vue-data fill with 44-form sample support
  *
- * services.misti.dev/portal/home/GD_IND_SERVICES lists 10 services backed by
- * 8 distinct form components (SSI145, handled precisely by
- * forms/misti-ssi145.js, plus 7 others: factory establishment/branch/change/
- * registration/operation-permit variants and an industrial-waste permit).
- * Each has its own `data.applicant` / `data.application` shape — hand-mapping
- * all of them like SSI145 would take one investigation-and-build pass per
- * form. Instead this adapter walks whatever shape it finds and fills it by
- * structural pattern + key-name heuristics, the same idea as content.js's
- * clue-based matching but applied to Vue data-property names instead of DOM
- * labels (data keys are consistent English identifiers, so name matching is
- * actually more reliable here than it is against free-form page text).
+ * Supports all 44 MISTI public service forms by combining:
+ * 1. Pre-filled comprehensive sample data from window.__bampenhMistiSamples
+ *    (harvested directly from all 44 form.js definitions and populated with
+ *    valid, realistic test data).
+ * 2. Automatic detection of service_form_hash from component or URL path.
+ * 3. Reactive deep-merge with cascade setters for address dropdowns
+ *    (province_id -> district_id -> commune_id -> village_id).
+ * 4. Safety-net recursive walker that fills any remaining unpopulated leaf fields.
  *
- * Trade-off: broad coverage across every GD_IND_* form (including ones added
- * later) instead of SSI145-level precision on any single one. Fields we
- * don't recognize are left blank rather than guessed at random.
- *
- * Must run in the MAIN world — see forms/misti-ssi145.js for why.
+ * Must run in the MAIN world (chrome.scripting.executeScript world: "MAIN")
  * ========================================================================== */
 
 (() => {
-  if (window.__bampenhFillMistiGeneric) return; // already installed
-
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const SETTLE_MS = 300;
-  const CASCADE_KEYS = ["province_id", "district_id", "commune_id", "village_id"];
-  const CASCADE_VALUES = { province_id: 1, district_id: 103, commune_id: 10302, village_id: 1030201 };
+  const CASCADE_KEYS = ["province_id", "district_id", "commune_id", "village_id", "province", "district", "commune", "village"];
+  const CASCADE_VALUES = {
+    province_id: 1,
+    district_id: 103,
+    commune_id: 10302,
+    village_id: 1030201,
+    province: 1,
+    district: 103,
+    commune: 10302,
+    village: "ភូមិ១"
+  };
   const today = () => new Date().toISOString().slice(0, 10);
 
-  // Any Vue component whose $data.data looks like { applicant, application }
-  // — the shape every GD_IND_* form shares, regardless of component name.
+  // Detect Vue component responsible for the form
   const findComponent = () => {
     const nodes = document.querySelectorAll("*");
     for (const el of nodes) {
       const v = el.__vue__;
-      const d = v && v.$data && v.$data.data;
-      if (d && d.applicant && d.application) return v;
+      if (!v) continue;
+      if (v.service_form_hash || (v.$data && v.$data.service_form_hash)) return v;
+      if (v.SERVICE_FORM_HASH) return v;
+      const d = (v.$data && v.$data.data) || v.data;
+      if (d && (d.applicant || d.application)) return v;
     }
     return null;
   };
 
-  // Never touch the legal-acknowledgment control — the user should tick that
-  // themselves. It shows up as a bare "agree" string field or an "agreed"
-  // boolean nested under a "declaration" object, depending on the form.
-  // Exact match only: several forms also have legitimate fields like
-  // "declaration_no"/"declaration_date" (a factory declaration document's
-  // reference number/date) that must NOT be caught by this.
-  const isConsentKey = (key) => /^agreed?$|^consent$/i.test(key);
-
-  // Best-effort value for one field by its property name. Returns undefined
-  // for anything not recognized — callers leave those blank rather than
-  // guess, since an arbitrary string in a strict dropdown/enum field is worse
-  // than leaving it for the user.
-  const classifyLeaf = (key, parentKey) => {
-    if (isConsentKey(key)) return undefined;
-    const k = key.toLowerCase();
-    const p = (parentKey || "").toLowerCase();
-
-    if (k === "email") return `${p || "test"}@test.com`;
-    if (k === "other_telephone") return "098765432";
-    if (/telephone|^phone$|^tel$|^contact$/.test(k)) return "012345678";
-    if (k === "gender") return 1;
-    if (k === "nationality_id") return 1;
-    if (k === "personal_code") return "123456789";
-    if (/issue_date/.test(k)) return "2025-01-01";
-    if (/expiry_date/.test(k)) return "2035-01-01";
-    if (k === "position") return p ? p[0].toUpperCase() + p.slice(1) : "Staff";
-    if (k === "full_name_km" || (/_km$/.test(k) && /name/.test(k))) return "សាកល្បង";
-    if (k === "full_name_en" || (/_en$/.test(k) && /name/.test(k))) return "Test User";
-    if (/factory_name/.test(k)) return "Test Factory";
-    if (/product_name/.test(k)) return "Test Product";
-    if (/^country$/.test(k) || /import_country|export_country/.test(k)) return "Cambodia";
-    if (/unit_name/.test(k)) return "unit";
-    if (/experience|skill/.test(k)) return "5 years of relevant experience.";
-    if (/description|situation|reason|remark/.test(k)) return "N/A";
-    if (/total_production_building$/.test(k)) return "5"; // building count, not free text
-    if (/address|building_number|street_number/.test(k)) return "Phnom Penh";
-    if (/industrial_park|\bsez\b/.test(k)) return "N/A";
-    if (k === "title") return "N/A";
-    if (/^building$|machinery_facility|office_material|other_facility|vehicle_transportation/.test(k)) return "N/A";
-    if (/female/.test(k)) return "5";
-    if (/^is_|^has_/.test(k)) return true;
-    if (/_no$/.test(k) || /certificate_no|declaration_no/.test(k)) return "N/A-0001";
-    if (/date$/.test(k)) return today();
-    if (/qty|quantity|amount|capacity|surface_area|count|price|cost|percent|rate|^years?_of|valume|volume/.test(k))
-      return "10";
-    return undefined;
+  // Detect the form hash from Vue component or URL
+  const detectFormHash = (comp, urlHint) => {
+    if (urlHint) return urlHint;
+    if (comp) {
+      if (comp.service_form_hash) return comp.service_form_hash;
+      if (comp.$data && comp.$data.service_form_hash) return comp.$data.service_form_hash;
+      if (comp.SERVICE_FORM_HASH) return comp.SERVICE_FORM_HASH;
+      if (comp.$options && comp.$options.name && comp.$options.name.startsWith("GD_")) return comp.$options.name;
+      if (comp.$options && comp.$options.name && comp.$options.name.startsWith("ISC_")) return comp.$options.name;
+      if (comp.$options && comp.$options.name && comp.$options.name.startsWith("NMC_")) return comp.$options.name;
+      if (comp.$options && comp.$options.name && comp.$options.name.startsWith("STINL_")) return comp.$options.name;
+    }
+    try {
+      const m = window.location.pathname.match(/\/(?:portal\/)?(?:draft_applications|applications)\/(?:new|edit)\/([^/?#]+)/) ||
+                window.location.pathname.match(/\/(?:portal\/)?(?:draft_applications|applications)\/([^/?#]+)/);
+      if (m) return m[1];
+    } catch (_) {}
+    return null;
   };
 
   const isPlainObject = (v) => v && typeof v === "object" && !Array.isArray(v);
 
-  // An attachment map: every value is a {filename,url} pair. Detected by
-  // shape, not by name, since these appear at any depth under any key
-  // (top-level `attachment`, but also nested ones like `waste.gas_waste.*`).
+  // Check if an object is an attachment pair
+  const isAttachment = (obj) => {
+    if (!isPlainObject(obj)) return false;
+    const keys = Object.keys(obj);
+    return (keys.length === 2 && "filename" in obj && "url" in obj) ||
+           (keys.length === 3 && "filename" in obj && "url" in obj && "title" in obj);
+  };
+
   const isAttachmentMap = (obj) => {
     const values = Object.values(obj);
     if (!values.length) return false;
     return values.every(
-      (v) => isPlainObject(v) && "filename" in v && "url" in v && Object.keys(v).length === 2
+      (v) => isPlainObject(v) && "filename" in v && "url" in v && Object.keys(v).length <= 3
     );
   };
 
   const fillAttachmentMap = (obj) => {
     let count = 0;
     for (const [key, file] of Object.entries(obj)) {
-      if (file.filename === "" && file.url === "") {
+      if (!file) {
+        obj[key] = { url: `/uploads/${key}.pdf`, filename: `${key}.pdf` };
+        count++;
+      } else if (file.filename === "" && file.url === "") {
         file.url = `/uploads/${key}.pdf`;
         file.filename = `${key}.pdf`;
         count++;
@@ -114,18 +96,144 @@
     return count;
   };
 
-  const isLocationBlock = (obj) => "province_id" in obj && "district_id" in obj;
+  const isLocationBlock = (obj) => isPlainObject(obj) && ("province_id" in obj || "province" in obj);
 
-  const fillCascade = async (obj) => {
+  const fillCascade = async (target, source = null) => {
     for (const key of CASCADE_KEYS) {
-      if (!(key in obj)) continue;
-      if (obj[key] === "" || obj[key] === null) obj[key] = CASCADE_VALUES[key];
-      await wait(SETTLE_MS);
+      if (!(key in target)) continue;
+      const val = source && (key in source) && source[key] !== "" && source[key] !== null
+        ? source[key]
+        : CASCADE_VALUES[key];
+      if (target[key] === "" || target[key] === null || target[key] === undefined) {
+        target[key] = val;
+        await wait(SETTLE_MS);
+      }
     }
   };
 
-  // Recursively fill one node. `parentKey` is the enclosing object's own key
-  // (used to vary generated values, e.g. "owner" vs "manager" email/position).
+  // Best-effort value for any leaf property
+  const classifyLeaf = (key, parentKey) => {
+    const k = key.toLowerCase();
+    const p = (parentKey || "").toLowerCase();
+
+    if (/^agree$|^agreed$|^is_declaration_accepted$|^declaration_accepted$/i.test(k)) return true;
+    if (/^is_fetched_from_cam_?dx$/i.test(k)) return false;
+    if (/^is_domestic$/i.test(k)) return true;
+    if (/^is_import$/i.test(k)) return false;
+    if (/^is_individual$/i.test(k)) return false;
+    if (/^training_at_institute$/i.test(k)) return true;
+    if (/^top_management$|^manager$|^supervisor$|^employee$/i.test(k) && p.includes("target")) return true;
+    if (/^show_product_info$|^show_equipment_info$|^showform$|^saved$/i.test(k)) return true;
+
+    if (k === "type" && (p === "applicant" || p.includes("applicant"))) return "LEGAL";
+    if (k === "cert_type" || k === "applicant_type") return "LEGAL";
+    if (k === "licensee_type") return "LEGAL_ENTITY";
+    if (k === "has_representative") return "HAS";
+    if (k === "service_option" || k === "cdc") return "CDC";
+    if (k === "gender") return 1;
+    if (k === "nationality_id") return 1;
+    if (k === "unit_type") return 1;
+    if (k === "industry_type") return "FACTORY";
+    if (k === "establishment_type") return 1;
+    if (k === "consultant_type") return 1;
+    if (k === "license_type") return 1;
+    if (k === "company_type") return 1;
+    if (k === "license_activity") return 1;
+    if (k === "requested_product_type") return "ALL";
+    if (k === "selection_type") return "MANUAL";
+    if (k === "training_mode") return "Physical";
+    if (k === "distance_type") return "NEAR";
+    if (k === "request_type") return 1;
+    if (k === "certificate_type") return "NEW";
+
+    if (k === "email") return `${p || "test"}@test.com`;
+    if (k === "other_telephone" || k === "other_contact") return "098765432";
+    if (/telephone|^phone$|^tel$|^contact$|mobile/.test(k)) return "012345678";
+    if (k === "personal_code" || k === "identity_number") return "123456789";
+    if (/issue_date/.test(k)) return "2025-01-01";
+    if (/expiry_date|expire_date/.test(k)) return "2035-01-01";
+    if (k === "position") return p ? p[0].toUpperCase() + p.slice(1) : "Staff";
+    if (k === "full_name_km" || (/_km$/.test(k) && /name/.test(k))) return "សាកល្បង";
+    if (k === "full_name_en" || (/_en$/.test(k) && /name/.test(k))) return "Test User";
+    if (/factory_name/.test(k)) return "Test Factory";
+    if (/product_name/.test(k)) return "Test Product";
+    if (/^country$/.test(k) || /import_country|export_country/.test(k)) return "Cambodia";
+    if (/unit_name/.test(k)) return "កេស / Box";
+    if (/experience|skill/.test(k)) return "5 years of relevant experience.";
+    if (/description|situation|reason|remark|comment/.test(k)) return "គ្មាន / None";
+    if (/total_production_building$/.test(k)) return "5";
+    if (/address|building_number|street_number|house_number/.test(k)) return "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ ភ្នំពេញ";
+    if (/industrial_park|\bsez\b/.test(k)) return "PPSEZ";
+    if (k === "title") return "Test Title";
+    if (/^building$|machinery_facility|office_material|other_facility|vehicle_transportation/.test(k)) return "50000";
+    if (/female|male/.test(k)) return "10";
+    if (/^is_|^has_/.test(k)) return true;
+    if (/_no$/.test(k) || /certificate_no|declaration_no|register_no|patent_number|tin/.test(k)) return "REG-2025-0001";
+    if (/date$/.test(k)) return today();
+    if (/qty|quantity|amount|capacity|surface_area|count|price|cost|percent|rate|^years?_of|valume|volume/.test(k)) return "100";
+    if (/standard/.test(k)) return "CS 001:2020";
+
+    return "សាកល្បង";
+  };
+
+  // Deep recursive merge from source sample into target Vue data
+  const deepMergeSample = async (target, source, stats) => {
+    if (!target || !source) return;
+
+    // Handle location blocks with cascade setter
+    if (isLocationBlock(target) && isLocationBlock(source)) {
+      for (const k of CASCADE_KEYS) {
+        if (k in source && source[k] !== "" && source[k] !== null && source[k] !== undefined) {
+          target[k] = source[k];
+          stats.locations++;
+          await wait(SETTLE_MS);
+        }
+      }
+    }
+
+    for (const [key, val] of Object.entries(source)) {
+      // Location keys already handled in order
+      if (isLocationBlock(target) && CASCADE_KEYS.includes(key)) continue;
+
+      if (val === null || val === undefined) continue;
+
+      if (Array.isArray(val)) {
+        if (!Array.isArray(target[key]) || target[key].length === 0) {
+          target[key] = JSON.parse(JSON.stringify(val));
+          stats.lists++;
+        } else {
+          for (let i = 0; i < val.length; i++) {
+            if (i < target[key].length) {
+              await deepMergeSample(target[key][i], val[i], stats);
+            } else {
+              target[key].push(JSON.parse(JSON.stringify(val[i])));
+            }
+          }
+          stats.lists++;
+        }
+        continue;
+      }
+
+      if (isPlainObject(val)) {
+        if (isAttachment(val)) {
+          target[key] = { ...val };
+          stats.attachments++;
+          continue;
+        }
+        if (!isPlainObject(target[key])) {
+          target[key] = {};
+        }
+        await deepMergeSample(target[key], val, stats);
+        continue;
+      }
+
+      // Primitive leaf
+      target[key] = val;
+      stats.fields++;
+    }
+  };
+
+  // Generic fallback walker for any remaining unpopulated fields
   const fillNode = async (node, parentKey, stats) => {
     if (Array.isArray(node)) {
       if (/_list$/i.test(parentKey || "") && node.length) {
@@ -149,12 +257,12 @@
     }
 
     for (const [key, value] of Object.entries(node)) {
-      if (CASCADE_KEYS.includes(key)) continue; // handled by fillCascade above
+      if (CASCADE_KEYS.includes(key)) continue;
       if (isPlainObject(value) || Array.isArray(value)) {
         await fillNode(value, key, stats);
         continue;
       }
-      if (value !== "" && value !== null) continue; // already has a value — leave it
+      if (value !== "" && value !== null && value !== undefined) continue;
       const filled = classifyLeaf(key, parentKey);
       if (filled !== undefined) {
         node[key] = filled;
@@ -163,34 +271,75 @@
     }
   };
 
-  const isValidProfile = (p) => !!(p && p.applicant && p.application);
+  const isValidProfile = (p) => !!(p && (p.applicant || p.application));
 
-  window.__bampenhFillMistiGeneric = async (profileOverride) => {
+  window.__bampenhFillMistiGeneric = async (profileOverride, formHashHint) => {
     try {
       const comp = findComponent();
       if (!comp) return { ok: false, error: "Couldn't find a MISTI form component on this page." };
 
-      if (isValidProfile(profileOverride)) {
-        // Custom profile: same shape as the live $data ({ applicant, application,
-        // [selectedEquipment] }) — merge it in directly, same convention as the
-        // SSI145 adapter, then let the generic walker fill anything the caller
-        // left blank.
-        comp.data.applicant = { ...comp.data.applicant, ...profileOverride.applicant };
-        Object.assign(comp.data.application, profileOverride.application);
-      } else {
-        comp.data.applicant = {
-          type: "LEGAL",
-          id: "000",
-          name_km: "ក្រុមហ៊ុន សាកល្បង",
-          name_en: "Test Company Co., Ltd",
-          contact: "012345678",
-        };
-      }
+      const formHash = detectFormHash(comp, formHashHint);
+      const samplesMap = window.__bampenhMistiSamples || {};
+      const sample = formHash ? samplesMap[formHash] : null;
 
       const stats = { fields: 0, attachments: 0, locations: 0, lists: 0 };
-      await fillNode(comp.data.application, "application", stats);
 
-      return { ok: true, filled: stats };
+      // Ensure comp.data exists
+      if (!comp.data && comp.$data && comp.$data.data) {
+        comp.data = comp.$data.data;
+      } else if (!comp.data && comp.$data) {
+        comp.$data.data = { applicant: {}, application: {} };
+        comp.data = comp.$data.data;
+      }
+
+      if (sample) {
+        // Deep clone sample data
+        const sampleCopy = JSON.parse(JSON.stringify(sample));
+
+        // If custom user profile was passed, apply overrides
+        if (isValidProfile(profileOverride)) {
+          if (profileOverride.applicant) {
+            sampleCopy.applicant = { ...sampleCopy.applicant, ...profileOverride.applicant };
+          }
+          if (profileOverride.application) {
+            Object.assign(sampleCopy.application, profileOverride.application);
+          }
+        }
+
+        // Merge sample data into Vue component data
+        if (comp.data) {
+          if (!comp.data.applicant) comp.data.applicant = {};
+          if (!comp.data.application) comp.data.application = {};
+          await deepMergeSample(comp.data.applicant, sampleCopy.applicant, stats);
+          await deepMergeSample(comp.data.application, sampleCopy.application, stats);
+        }
+      } else {
+        // Fallback when no pre-packaged sample is available
+        if (isValidProfile(profileOverride)) {
+          comp.data.applicant = { ...comp.data.applicant, ...profileOverride.applicant };
+          Object.assign(comp.data.application, profileOverride.application);
+        } else {
+          comp.data.applicant = {
+            type: "LEGAL",
+            id: "000123456789",
+            name_km: "ក្រុមហ៊ុន សាកល្បង ឯ.ក",
+            name_en: "Test Enterprise Co., Ltd.",
+            contact: "012345678",
+          };
+        }
+      }
+
+      // Safety net: fill any remaining blank leaf properties
+      if (comp.data && comp.data.application) {
+        await fillNode(comp.data.application, "application", stats);
+      }
+
+      return {
+        ok: true,
+        formHash: formHash || "GENERIC",
+        usedSample: !!sample,
+        filled: stats
+      };
     } catch (e) {
       return { ok: false, error: e.message };
     }

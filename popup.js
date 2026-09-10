@@ -90,40 +90,51 @@ function setStatus(text, kind) {
 // listed under services.misti.dev/portal/home/GD_IND_SERVICES) is covered by
 // a schema-agnostic one (forms/misti-generic.js) that fills whatever shape
 // it finds by structural pattern + key-name heuristics.
-const MISTI_HOSTNAMES = new Set(["services.misti.dev", "localhost", "127.0.0.1"]);
+const MISTI_HOSTNAMES = new Set(["services.misti.dev", "services.misti.gov.kh", "localhost", "127.0.0.1"]);
+
+function isMistiUrl(url) {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return MISTI_HOSTNAMES.has(u.hostname) || u.hostname.endsWith(".misti.dev") || u.hostname.endsWith(".misti.gov.kh");
+  } catch (_) {
+    return false;
+  }
+}
 
 function mistiFormHash(url) {
   if (!url) return null;
   try {
     const u = new URL(url);
-    if (!MISTI_HOSTNAMES.has(u.hostname)) return null;
-    const m = u.pathname.match(/\/draft_applications\/new\/([^/?]+)/);
+    if (!isMistiUrl(url)) return null;
+    const m = u.pathname.match(/\/(?:portal\/)?(?:draft_applications|applications)\/(?:new|edit)\/([^/?#]+)/) ||
+              u.pathname.match(/\/(?:portal\/)?(?:draft_applications|applications)\/([^/?#]+)/);
     return m ? m[1] : null;
   } catch (_) {
     return null;
   }
 }
 
-async function fillMistiForm(tab, mode, file, fnName) {
+async function fillMistiForm(tab, mode, file, fnName, formHash) {
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     world: "MAIN",
-    files: [file],
+    files: ["forms/misti-form-samples.js", file],
   });
 
   let profileArg = null;
   if (mode === "profile") {
     try {
       const { profile } = await chrome.storage.local.get("profile");
-      if (profile && profile.applicant && profile.application) profileArg = profile;
+      if (profile && (profile.applicant || profile.application)) profileArg = profile;
     } catch (_) {}
   }
 
   const [{ result } = {}] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     world: "MAIN",
-    func: (name, p) => window[name](p),
-    args: [fnName, profileArg],
+    func: (name, p, hash) => window[name](p, hash),
+    args: [fnName, profileArg, formHash],
   });
   return result;
 }
@@ -135,30 +146,40 @@ async function doFill(mode) {
 
   const tab = await activeTab();
   const formHash = mistiFormHash(tab && tab.url);
-  if (formHash) {
+  const isMisti = isMistiUrl(tab && tab.url);
+
+  if (formHash || isMisti) {
     const isSSI145 = formHash === "GD_IND_SSI145";
     const file = isSSI145 ? "forms/misti-ssi145.js" : "forms/misti-generic.js";
     const fnName = isSSI145 ? "__bampenhFillSSI145" : "__bampenhFillMistiGeneric";
     try {
-      const res = await fillMistiForm(tab, mode, file, fnName);
-      if (!res || !res.ok) throw new Error((res && res.error) || "No response from page.");
-      if (isSSI145) {
-        const eq = res.filled.equipmentTypes.length;
-        setStatus(
-          `Filled applicant, location, owner/representative, attachments${eq ? `, and ${eq} equipment type(s)` : ""}.`,
-          "good"
-        );
-      } else {
-        const { fields, attachments, locations, lists } = res.filled;
-        setStatus(
-          `Filled ${fields} field(s), ${attachments} attachment(s), ${locations} location block(s), ${lists} list row(s).`,
-          "good"
-        );
+      const res = await fillMistiForm(tab, mode, file, fnName, formHash);
+      if (res && res.ok) {
+        if (isSSI145) {
+          const eq = (res.filled && res.filled.equipmentTypes) ? res.filled.equipmentTypes.length : 0;
+          setStatus(
+            `Filled applicant, location, owner/representative, attachments${eq ? `, and ${eq} equipment type(s)` : ""}.`,
+            "good"
+          );
+        } else {
+          const { fields = 0, attachments = 0, locations = 0, lists = 0 } = (res && res.filled) || {};
+          const formName = res && res.formHash ? ` [${res.formHash}]` : "";
+          setStatus(
+            `Filled${formName} ${fields} field(s), ${attachments} attachment(s), ${locations} location block(s), ${lists} list row(s).`,
+            "good"
+          );
+        }
+        return;
+      }
+      if (formHash) {
+        throw new Error((res && res.error) || "No response from page.");
       }
     } catch (e) {
-      setStatus(e.message, "bad");
+      if (formHash) {
+        setStatus(e.message, "bad");
+        return;
+      }
     }
-    return;
   }
 
   let profile = {};

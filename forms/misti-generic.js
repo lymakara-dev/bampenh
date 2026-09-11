@@ -134,7 +134,8 @@
     const k = key.toLowerCase();
     const p = (parentKey || "").toLowerCase();
 
-    if (/^agree$|^agreed$|^is_declaration_accepted$|^declaration_accepted$/i.test(k)) return true;
+    if (/^agree$/i.test(k)) return "";
+    if (/^agreed$|^is_declaration_accepted$|^declaration_accepted$/i.test(k)) return false;
     if (/^is_fetched_from_cam_?dx$/i.test(k)) return false;
     if (/^is_domestic$/i.test(k)) return true;
     if (/^is_import$/i.test(k)) return false;
@@ -287,6 +288,14 @@
 
     for (const [key, value] of Object.entries(node)) {
       if (CASCADE_KEYS.includes(key)) continue;
+      if (/^agree$/i.test(key)) {
+        node[key] = "";
+        continue;
+      }
+      if (/^agreed$|^is_declaration_accepted$|^declaration_accepted$/i.test(key)) {
+        node[key] = false;
+        continue;
+      }
       if (isPlainObject(value) || Array.isArray(value)) {
         await fillNode(value, key, stats);
         continue;
@@ -375,6 +384,9 @@
       // Safety net: fill any remaining blank leaf properties
       if (comp.data && comp.data.application) {
         await fillNode(comp.data.application, "application", stats);
+        if ("agree" in comp.data.application) {
+          comp.data.application.agree = "";
+        }
       }
 
       return {

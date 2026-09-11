@@ -134,6 +134,7 @@
       },
       application: {
         industry_type: "FACTORY",
+        agree: "",
         other_contact: "098765432",
         brand_name_km: "ម៉ាកសាកល្បង",
         brand_name_en: "Test Brand",
@@ -215,6 +216,9 @@
 
       comp.data.applicant = { ...profile.applicant };
       Object.assign(comp.data.application, topFields);
+      if ("agree" in comp.data.application || comp.data.application.agree === undefined) {
+        comp.data.application.agree = "";
+      }
 
       if (factory_location) {
         await fillCascade(comp.data.application.factory_location, factory_location);

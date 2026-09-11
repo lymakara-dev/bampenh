@@ -37,6 +37,7 @@ const newData = { ...oldData };
 
 const generateDummy = (key) => {
   const kl = key.toLowerCase();
+  if (kl === 'agree' || kl === 'agreed') return '';
   if (kl.includes('phone') || kl.includes('contact') || kl.includes('ទូរស័ព្ទ')) return '012345678';
   if (kl.includes('email') || kl.includes('ម៉ែល')) return 'test@example.com';
   if (kl.includes('date') || kl.includes('កាលបរិច្ឆេទ')) return '2025-01-01';

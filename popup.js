@@ -17,6 +17,11 @@ async function getSampleProfile() {
 
 const $ = (sel) => document.querySelector(sel);
 
+try {
+  const ver = chrome.runtime?.getManifest?.()?.version;
+  if (ver && $(".ver")) $(".ver").textContent = `v${ver}`;
+} catch (_) {}
+
 /* ---------------------------- tabs ----------------------------------- */
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {

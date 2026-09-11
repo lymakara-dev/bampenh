@@ -373,7 +373,8 @@ function getFieldValue(key, parentKey = '', fullPath = '', isPhysical = false) {
   const pathLower = (fullPath || '').toLowerCase();
 
   // Boolean flags & agreements
-  if (/^agree$|^agreed$|^is_declaration_accepted$|^declaration_accepted$/i.test(key)) return true;
+  if (/^agree$/i.test(key)) return "";
+  if (/^agreed$|^is_declaration_accepted$|^declaration_accepted$/i.test(key)) return false;
   if (/^is_fetched_from_cam_?dx$/i.test(key)) return false;
   if (/^is_domestic$/i.test(key)) return true;
   if (/^is_import$/i.test(key)) return false;
@@ -476,6 +477,14 @@ function fillNode(node, parentKey = '', fullPath = '', isPhysical = false) {
     const result = {};
     for (const [key, val] of Object.entries(node)) {
       const nextPath = fullPath ? `${fullPath}.${key}` : key;
+      if (/^agree$/i.test(key)) {
+        result[key] = "";
+        continue;
+      }
+      if (/^agreed$|^is_declaration_accepted$|^declaration_accepted$/i.test(key)) {
+        result[key] = false;
+        continue;
+      }
       if (val === null && (key.includes('certificate') || key.includes('document') || key.includes('attachment') || key.includes('id') || key.includes('photo') || key.includes('permit') || key.includes('status') || key.includes('article') || key.includes('report') || key.includes('result') || key.includes('video') || key.includes('drawing') || key.includes('plan'))) {
         result[key] = mockAttachment(key);
       } else if (val === null && (key.includes('date') || key.includes('day'))) {
@@ -523,10 +532,10 @@ function applyFormConditions(formHash, data, options = {}) {
   const app = data.application;
 
   // Common flags
-  if ('agree' in app) app.agree = true;
-  if ('agreed' in app) app.agreed = true;
-  if ('is_declaration_accepted' in app) app.is_declaration_accepted = true;
-  if (app.declaration && 'agreed' in app.declaration) app.declaration.agreed = true;
+  if ('agree' in app) app.agree = "";
+  if ('agreed' in app) app.agreed = false;
+  if ('is_declaration_accepted' in app) app.is_declaration_accepted = false;
+  if (app.declaration && 'agreed' in app.declaration) app.declaration.agreed = false;
 
   // ------------------------------------------------------------------------
   // Form-Specific Conditional Branch Handlers
@@ -1313,7 +1322,7 @@ async function harvestRawTemplate(dirName) {
         applicant: rawData.applicant || { ...REALISTIC_DATA.applicant_legal },
         application: {
           version: 1,
-          agree: true,
+          agree: "",
           applicant: rawData.applicant || { ...REALISTIC_DATA.applicant_legal },
           factories: rawData.factories,
           attachment: rawData.attachment
@@ -1324,6 +1333,10 @@ async function harvestRawTemplate(dirName) {
     rawData = mod.default();
   } else {
     rawData = clone(mod.default);
+  }
+
+  if (rawData && rawData.application && 'agree' in rawData.application) {
+    rawData.application.agree = "";
   }
 
   return rawData;

@@ -387,6 +387,14 @@
     text: "Sample Text",
   };
 
+  const isAgreeField = (el) => {
+    const name = (el.name || "").toLowerCase();
+    const id = (el.id || "").toLowerCase();
+    if (/^agree$|^agreed$|^terms$|^agreement$/.test(name) || /^agree$|^agreed$|^terms$|^agreement$/.test(id)) return true;
+    const clues = describeField(el).map(normalize).join(" ");
+    return /agree|termsandconditions|iagree|agreement|យល់ព្រម/.test(clues);
+  };
+
   // Produce a human-readable suggestion for a control, including selects/radios
   // whose suggestion is one of the options actually on the page.
   const suggestForControl = (el) => {
@@ -416,6 +424,7 @@
       return { category: "radio", value: label, raw: pick.value || "on" };
     }
     if (type === "checkbox") {
+      if (isAgreeField(el)) return { category: "checkbox", value: "Unchecked", raw: false };
       return { category: "checkbox", value: "Checked", raw: true };
     }
 
@@ -1385,7 +1394,10 @@
       const real = Array.from(el.options).find((o) => o.value && !o.disabled);
       return real ? real.value : "";
     }
-    if (type === "checkbox") return true;
+    if (type === "checkbox") {
+      if (isAgreeField(el)) return false;
+      return true;
+    }
     if (type === "radio") return el.value || "on";
     if (isDateField(el)) {
       if (type === "time") return "09:30";

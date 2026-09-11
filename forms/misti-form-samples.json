@@ -148,7 +148,7 @@
         "change_owner": "on",
         "change_name": "on"
       },
-      "agree": true,
+      "agree": "",
       "factory": {
         "factory_location": {
           "factory_name_km": "រោងចក្រ សាកល្បង គំរូ",
@@ -785,7 +785,7 @@
         }
       },
       "declaration": {
-        "agreed": true
+        "agreed": false
       }
     }
   },
@@ -1371,7 +1371,7 @@
     "application": {
       "version": 1,
       "request_type": "1",
-      "agree": true,
+      "agree": "",
       "factory_location": {
         "factory_name_km": "រោងចក្រ សាកល្បង គំរូ",
         "factory_name_en": "Test Model Factory",
@@ -1981,7 +1981,7 @@
         }
       },
       "declaration": {
-        "agreed": true
+        "agreed": false
       },
       "request_type": 1
     }
@@ -2018,7 +2018,7 @@
     "application": {
       "version": 1,
       "request_type": "សាកល្បង",
-      "agree": true,
+      "agree": "",
       "company": {
         "email": "company@test.com",
         "province_id": 1,
@@ -2091,7 +2091,7 @@
     },
     "application": {
       "version": 1,
-      "agree": true,
+      "agree": "",
       "applicant": {
         "gender": 1,
         "position": "អគ្គនាយក / General Director",
@@ -2355,7 +2355,7 @@
       "other_contact": "098765432",
       "request_type": "NEW",
       "has_representative": "HAS",
-      "agree": true,
+      "agree": "",
       "permit_request": {
         "waste_water": true,
         "solid_waste": true,
@@ -2840,7 +2840,7 @@
         "change_owner": "on",
         "change_name": "on"
       },
-      "agree": true,
+      "agree": "",
       "factory": {
         "factory_location": {
           "factory_name_km": "រោងចក្រ សាកល្បង គំរូ",
@@ -3112,7 +3112,7 @@
     "application": {
       "version": 2,
       "type": "1",
-      "agree": true,
+      "agree": "",
       "enterprise_type": "សាកល្បង",
       "enterprise_name_km": "សហគ្រាស សាកល្បង គំរូ",
       "enterprise_name_en": "Test Model Enterprise",
@@ -3442,7 +3442,7 @@
         "email": "contact@testenterprise.com",
         "website": "https://testenterprise.com"
       },
-      "agree": true,
+      "agree": "",
       "has_representative": "HAS",
       "management": {
         "owner": {
@@ -3587,7 +3587,7 @@
     "application": {
       "version": 1,
       "request_type": "សាកល្បង",
-      "agree": true,
+      "agree": "",
       "applicant_extra": {
         "gender": "សាកល្បង",
         "nationality": "សាកល្បង",
@@ -3731,7 +3731,7 @@
       "version": 1,
       "request_option": "សាកល្បង",
       "request_type": 1,
-      "agree": true,
+      "agree": "",
       "applicant_extra": {
         "gender": "សាកល្បង",
         "nationality": "សាកល្បង",
@@ -3851,19 +3851,27 @@
       "website": "https://testenterprise.com"
     },
     "application": {
-      "version": 1,
+      "version": 2,
       "request_type": "NEW",
-      "agree": true,
+      "previous_certificate_number": "CERT-2020-001",
+      "previous_certificate_issued_date": "2020-05-01",
+      "agree": "",
       "applicant_information": {
+        "register_no": "REG-2023-5566",
+        "company_name_km": "ក្រុមហ៊ុន សាកល្បង ឯ.ក",
+        "company_name_en": "Test Enterprise Co., Ltd.",
         "name_km": "សាកល្បង",
         "name_en": "Test Item",
-        "age": "សាកល្បង",
+        "representative_name_km": "សាកល្បង",
+        "representative_name_en": "Test Item",
+        "date_of_birth": "2025-01-01",
         "nationality_id": 1,
         "position": "សាកល្បង",
+        "identity_number": "100",
+        "identity_expiry_date": "2035-01-01",
         "phone": "012345678",
         "email": "applicant_information@test.com",
-        "company_name": "ក្រុមហ៊ុន សាកល្បង ឯ.ក",
-        "company_address": {
+        "address": {
           "province_id": 1,
           "district_id": 103,
           "commune_id": 10302,
@@ -3891,6 +3899,10 @@
           "name": "សាកល្បង / Test",
           "usage": "សាកល្បង",
           "quantity_percent": "100",
+          "attachment": {
+            "url": "/uploads/attachment.pdf",
+            "filename": "attachment.pdf"
+          },
           "other": "គ្មាន / None"
         }
       ],
@@ -3899,6 +3911,10 @@
           "description": "គ្មាន / None",
           "installation_date": "2025-01-01",
           "verification_date": "2025-01-01",
+          "attachment": {
+            "url": "/uploads/attachment.pdf",
+            "filename": "attachment.pdf"
+          },
           "other": "គ្មាន / None"
         }
       ],
@@ -4102,7 +4118,7 @@
     "application": {
       "version": 4,
       "product_type": "EEE",
-      "agree": true,
+      "agree": "",
       "license": {
         "number": "100",
         "issue_date": "2025-01-01",
@@ -4264,6 +4280,13 @@
       "commune_id": 10302,
       "village_id": 1030201,
       "email": "contact@testenterprise.com",
+      "representative_name_km": "សាកល្បង",
+      "representative_date_of_birth": "2025-01-01",
+      "representative_age": "សាកល្បង",
+      "representative_nationality_id": 1,
+      "representative_position": "សាកល្បង",
+      "representative_contact": "012345678",
+      "representative_email": "applicant@test.com",
       "phone": "012345678",
       "gender": 1,
       "nationality": "ខ្មែរ / Cambodian",
@@ -4281,10 +4304,11 @@
     },
     "application": {
       "version": 1,
-      "agree": true,
+      "agree": "",
       "service_type_id": "000123456789",
       "service_option_id": "000123456789",
-      "company_or_manufacture": "ក្រុមហ៊ុន និងរោងចក្រផលិត",
+      "number_certificate": "100",
+      "date_certificate": "2025-01-01",
       "applicant": {},
       "company": {
         "company_name_en": "Test Enterprise Co., Ltd.",
@@ -4305,9 +4329,7 @@
         "province_id": 1,
         "district_id": 103,
         "commune_id": 10302,
-        "village_id": 1030201,
-        "location_lat": 11.569188790149347,
-        "location_lng": 104.92447938383688
+        "village_id": 1030201
       },
       "attachment": {
         "prakas_and_operation_certificate": {
@@ -4330,10 +4352,12 @@
           "url": "/uploads/factory_layout.pdf",
           "filename": "factory_layout.pdf"
         },
-        "other_document": {
-          "url": "/uploads/other_document.pdf",
-          "filename": "other_document.pdf"
-        },
+        "other_document": [
+          {
+            "url": "/uploads/other_document.pdf",
+            "filename": "other_document.pdf"
+          }
+        ],
         "invoice_for_service_payment": {
           "url": "/uploads/invoice_for_service_payment.pdf",
           "filename": "invoice_for_service_payment.pdf"
@@ -4384,7 +4408,7 @@
       "version": 1,
       "is_fetched_from_cam_dx": false,
       "company_id_from_cam_dx": "សាកល្បង",
-      "agree": true,
+      "agree": "",
       "requested_product_type": "ALL",
       "representative": {
         "name_km": "asdfasdf",
@@ -4737,7 +4761,7 @@
       "previous_certificate_number": "CERT-2020-001",
       "initial_issue_date": "2025-01-01",
       "request_type": "NEW",
-      "agree": true,
+      "agree": "",
       "applicant_information": {
         "representative_name_km": "សាកល្បង",
         "representative_name_en": "Test Item",
@@ -4768,7 +4792,7 @@
       },
       "product_list": [
         {
-          "hash": "cfs-1789015321084-o8m1ql",
+          "hash": "cfs-1789109811240-ve3cfb",
           "destination_country_id": "000123456789",
           "product_name": "ទឹកបរិសុទ្ធធម្មជាតិ / Natural Purified Water",
           "weight_net_content": "500g",
@@ -4856,6 +4880,8 @@
       "commune_id": 10302,
       "village_id": 1030201,
       "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+      "old_license": "LIC-2021-003",
+      "old_license_date": "2021-02-01",
       "manager": {
         "name_km": "ម៉ាការា សុខ",
         "name_en": "Makara Sok",
@@ -4871,6 +4897,8 @@
       },
       "factory": {
         "name": "សាកល្បង / Test",
+        "name_km": "សាកល្បង",
+        "name_en": "Test Item",
         "country": 1,
         "province_id": 1,
         "district_id": 103,
@@ -4880,7 +4908,7 @@
         "location_lat": 11.569188790149347,
         "location_lng": 104.92447938383688
       },
-      "agree": true,
+      "agree": "",
       "product": {
         "name": "សាកល្បង / Test",
         "refer_standard": "CS 001:2020",
@@ -4923,10 +4951,12 @@
           "url": "/uploads/trademark_certificate.pdf",
           "filename": "trademark_certificate.pdf"
         },
-        "production_line_photos": {
-          "url": "/uploads/production_line_photos.pdf",
-          "filename": "production_line_photos.pdf"
-        },
+        "production_line_photos": [
+          {
+            "url": "/uploads/production_line_photos.pdf",
+            "filename": "production_line_photos.pdf"
+          }
+        ],
         "license_agreement": {
           "url": "/uploads/license_agreement.pdf",
           "filename": "license_agreement.pdf"
@@ -4999,6 +5029,17 @@
       ],
       "request_type": 1,
       "consultant_type": 1,
+      "manager": {
+        "name_km": "ម៉ាការា សុខ",
+        "name_en": "Makara Sok",
+        "gender": 1,
+        "nationality_id": 1,
+        "personal_code": "010123456",
+        "issue_date": "2025-01-01",
+        "expiry_date": "2035-01-01",
+        "email": "makara.sok@test.com",
+        "telephone": "012345678"
+      },
       "organization": [
         {
           "name": "សាកល្បង / Test",
@@ -5020,7 +5061,7 @@
           "consultation_request_purpose": "គ្មាន / None",
           "consultation_request_date_start": "2025-01-01",
           "consultation_request_date_end": "2035-01-01",
-          "consultation_request_day_number": "100",
+          "consultation_request_day_number": 1,
           "target_client": {
             "top_management": false,
             "manager": false,
@@ -5030,6 +5071,7 @@
           }
         }
       ],
+      "has_head_office": 0,
       "head_office": {
         "street": "ផ្លូវលេខ ១២៣",
         "province_id": 1,
@@ -5106,7 +5148,7 @@
       "distance_type": "សាកល្បង",
       "packing_of_samples_for_testing": "សាកល្បង",
       "storage_of_samples_for_testing": "សាកល្បង",
-      "agree": true
+      "agree": ""
     }
   },
   "ISC_FORM_EBK180": {
@@ -5160,24 +5202,24 @@
       "name_km": "ក្រុមហ៊ុន សាកល្បង ឯ.ក",
       "name_en": "Test Enterprise Co., Ltd.",
       "contact": "012345678",
-      "email": "contact@testenterprise.com",
       "phone": "012345678",
-      "position": "អគ្គនាយក / General Director",
+      "email": "contact@testenterprise.com",
       "gender": 1,
       "nationality_id": 1,
-      "nationality": "ខ្មែរ / Cambodian",
+      "position": "អគ្គនាយក / General Director",
       "province_id": 1,
       "district_id": 103,
       "commune_id": 10302,
       "village_id": 1030201,
-      "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
-      "address_km": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
-      "address_en": "Building 45, Street 123, Boeng Kak 2, Tuol Kouk, Phnom Penh",
       "applicant_province_id": 1,
       "applicant_district_id": 103,
       "applicant_commune_id": 10302,
       "applicant_village_id": 1030201,
       "applicant_address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+      "nationality": "ខ្មែរ / Cambodian",
+      "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+      "address_km": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+      "address_en": "Building 45, Street 123, Boeng Kak 2, Tuol Kouk, Phnom Penh",
       "vat_tin": "K001-123456789",
       "fax": "023888990",
       "website": "https://testenterprise.com"
@@ -5186,6 +5228,9 @@
       "version": 1,
       "is_fetched_from_cam_dx": false,
       "company_id_from_cam_dx": "សាកល្បង",
+      "service_list": [
+        1
+      ],
       "applicant": {
         "type": "LEGAL",
         "id": "000123456789",
@@ -5214,16 +5259,23 @@
         "fax": "023888990",
         "website": "https://testenterprise.com"
       },
+      "manager": {
+        "name_km": "ម៉ាការា សុខ",
+        "name_en": "Makara Sok",
+        "gender": 1,
+        "nationality_id": 1,
+        "personal_code": "010123456",
+        "issue_date": "2025-01-01",
+        "expiry_date": "2035-01-01",
+        "telephone": "012345678",
+        "email": "makara.sok@test.com"
+      },
       "factory": [
         {
-          "hash": "67b0200a",
-          "is_individual": false,
           "name_km": "សាកល្បង",
           "name_en": "Test Item",
           "type": "សាកល្បង",
           "goods_or_services": "សាកល្បង",
-          "individual_category": "សាកល្បង",
-          "location": "សាកល្បង",
           "contact": "012345678",
           "email": "factory@test.com",
           "factory_province_id": 1,
@@ -5237,18 +5289,16 @@
       ],
       "training_details": [
         {
-          "hash": "3c2b6def",
-          "factory_hash": "67b0200a",
           "training_at_institute": true,
-          "service_code": "166",
+          "service_code": "សាកល្បង",
           "subject_type": [
             "ភាពអនុលោមផលិតផលកម្រិតបឋម"
           ],
           "subject_other": "គ្មាន / None",
-          "purpose": "asdfasdfasdf",
-          "number_of_participants": "2",
+          "purpose": "គ្មាន / None",
+          "number_of_participants": "100",
           "target_participants": [
-            "Top management",
+            "Top Management",
             "Manager"
           ],
           "target_participant_other": "គ្មាន / None",
@@ -5256,23 +5306,18 @@
           "requested_end_date": "2035-01-01",
           "requested_days": "100",
           "training_mode": "Physical",
-          "venue": "asdfasdf",
-          "venue_province_id": 3,
-          "venue_district_id": 302,
-          "venue_commune_id": 30202,
-          "venue_village_id": 3020201,
-          "venue_lat": 11.574435,
-          "venue_lng": 104.899216
+          "venue": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ ភ្នំពេញ",
+          "venue_province_id": 1,
+          "venue_district_id": 103,
+          "venue_commune_id": 10302,
+          "venue_village_id": 1030201
         }
       ],
       "coordinator": [
         {
-          "hash": "592a5205",
-          "factory_hash": "67b0200a",
-          "training_hash": "3c2b6def",
-          "full_name": "asdfasd",
-          "position": "fasdfasdf",
-          "telephone": "234234234",
+          "full_name": "Makara Sok",
+          "position": "ប្រធានគ្រប់គ្រង / General Manager",
+          "telephone": "012345678",
           "email": "makara.sok@test.com"
         }
       ],
@@ -5284,10 +5329,6 @@
         "national_id_or_passport": {
           "url": "/uploads/national_id_or_passport.pdf",
           "filename": "national_id_or_passport.pdf"
-        },
-        "identification_document": {
-          "url": "/uploads/identification_document.pdf",
-          "filename": "identification_document.pdf"
         }
       }
     }
@@ -5325,6 +5366,8 @@
       "version": 1,
       "request_type": 1,
       "license_type": "សាកល្បង",
+      "old_license": "LIC-2021-003",
+      "old_license_date": "2021-02-01",
       "province_id": 1,
       "district_id": 103,
       "commune_id": 10302,
@@ -5350,7 +5393,7 @@
         "location_lat": 11.569188790149347,
         "location_lng": 104.92447938383688
       },
-      "agree": true,
+      "agree": "",
       "product": {
         "name": "សាកល្បង / Test",
         "weight": "500g",
@@ -5400,13 +5443,153 @@
           "url": "/uploads/sample_label.pdf",
           "filename": "sample_label.pdf"
         },
-        "other_doc": {
-          "url": "/uploads/other_doc.pdf",
-          "filename": "other_doc.pdf"
-        },
+        "other_document": [
+          {
+            "url": "/uploads/other_document.pdf",
+            "filename": "other_document.pdf"
+          }
+        ],
+        "other_doc": [
+          {
+            "url": "/uploads/other_doc.pdf",
+            "filename": "other_doc.pdf"
+          }
+        ],
         "cfs_request_doc": {
           "url": "/uploads/cfs_request_doc.pdf",
           "filename": "cfs_request_doc.pdf"
+        }
+      }
+    }
+  },
+  "ISC_FORM_KOI145": {
+    "config": {
+      "allow_edit": [],
+      "comments": {},
+      "paid": []
+    },
+    "applicant": {
+      "type": "LEGAL",
+      "id": "000123456789",
+      "name_km": "ក្រុមហ៊ុន សាកល្បង ឯ.ក",
+      "name_en": "Test Enterprise Co., Ltd.",
+      "contact": "012345678",
+      "email": "contact@testenterprise.com",
+      "phone": "012345678",
+      "position": "អគ្គនាយក / General Director",
+      "gender": 1,
+      "nationality_id": 1,
+      "nationality": "ខ្មែរ / Cambodian",
+      "province_id": 1,
+      "district_id": 103,
+      "commune_id": 10302,
+      "village_id": 1030201,
+      "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+      "address_km": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+      "address_en": "Building 45, Street 123, Boeng Kak 2, Tuol Kouk, Phnom Penh",
+      "applicant_province_id": 1,
+      "applicant_district_id": 103,
+      "applicant_commune_id": 10302,
+      "applicant_village_id": 1030201,
+      "applicant_address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+      "vat_tin": "K001-123456789",
+      "fax": "023888990",
+      "website": "https://testenterprise.com"
+    },
+    "application": {
+      "version": 1,
+      "agree": "",
+      "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+      "manager_name_km": "សាកល្បង",
+      "manager_name_en": "Test Item",
+      "manager_position": "សាកល្បង",
+      "manager_phone": "012345678",
+      "manager_email": "application@test.com",
+      "type": "សាកល្បង",
+      "company_type": "សាកល្បង",
+      "license_type": 5,
+      "old_license": "LIC-2021-003",
+      "old_license_date": "2021-02-01",
+      "foreign_company": {
+        "name": "សាកល្បង / Test",
+        "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+        "phone": "012345678",
+        "email": "foreign_company@test.com"
+      },
+      "request_company": {
+        "name": "សាកល្បង / Test",
+        "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+        "phone": "012345678",
+        "email": "request_company@test.com"
+      },
+      "factory": {
+        "name": "សាកល្បង / Test",
+        "country": 1,
+        "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
+        "location_lat": 11.569188790149347,
+        "location_lng": 104.92447938383688
+      },
+      "product": {
+        "name": "សាកល្បង / Test",
+        "brand": "Test Brand",
+        "model": "MODEL-2025X",
+        "refer_standard": "CS 001:2020",
+        "rating": "Grade A"
+      },
+      "test_report_list": [
+        {
+          "number": "100",
+          "issue_date": "2025-01-01",
+          "lab_name": "មន្ទីរពិសោធន៍ សាកល្បង គំរូ",
+          "attachment": {
+            "url": "/uploads/attachment.pdf",
+            "filename": "attachment.pdf"
+          }
+        }
+      ],
+      "certificate_list": [
+        {
+          "number": "100",
+          "issue_date": "2025-01-01",
+          "certificate_name": "សាកល្បង / Test",
+          "attachment": {
+            "url": "/uploads/attachment.pdf",
+            "filename": "attachment.pdf"
+          }
+        }
+      ],
+      "attachment": {
+        "acknowledgement_letter": {
+          "url": "/uploads/acknowledgement_letter.pdf",
+          "filename": "acknowledgement_letter.pdf"
+        },
+        "yearly_patent": {
+          "url": "/uploads/yearly_patent.pdf",
+          "filename": "yearly_patent.pdf"
+        },
+        "factory_inspection_report": {
+          "url": "/uploads/factory_inspection_report.pdf",
+          "filename": "factory_inspection_report.pdf"
+        },
+        "circuit_diagram": {
+          "url": "/uploads/circuit_diagram.pdf",
+          "filename": "circuit_diagram.pdf"
+        },
+        "product_color_photograph": {
+          "url": "/uploads/product_color_photograph.pdf",
+          "filename": "product_color_photograph.pdf"
+        },
+        "rating_label": {
+          "url": "/uploads/rating_label.pdf",
+          "filename": "rating_label.pdf"
+        },
+        "user_instruction_manual_and_recod_of_modification": {
+          "url": "/uploads/user_instruction_manual_and_recod_of_modification.pdf",
+          "filename": "user_instruction_manual_and_recod_of_modification.pdf"
+        },
+        "document_relate_to_regulated_product": {
+          "url": "/uploads/document_relate_to_regulated_product.pdf",
+          "filename": "document_relate_to_regulated_product.pdf"
         }
       }
     }
@@ -5447,7 +5630,7 @@
     },
     "application": {
       "version": 1,
-      "agree": true,
+      "agree": "",
       "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
       "manager_name_km": "សាកល្បង",
       "manager_name_en": "Test Item",
@@ -5465,12 +5648,6 @@
         "phone": "012345678",
         "email": "foreign_company@test.com"
       },
-      "request_company": {
-        "name": "សាកល្បង / Test",
-        "address": "អគារលេខ ៤៥ ផ្លូវលេខ ១២៣ សង្កាត់បឹងកក់២ ខណ្ឌទួលគោក ភ្នំពេញ",
-        "phone": "012345678",
-        "email": "request_company@test.com"
-      },
       "factory": {
         "name": "សាកល្បង / Test",
         "country": 1,
@@ -5482,8 +5659,7 @@
         "name": "សាកល្បង / Test",
         "brand": "Test Brand",
         "model": "MODEL-2025X",
-        "refer_standard": "CS 001:2020",
-        "rating": "Grade A"
+        "refer_standard": "CS 001:2020"
       },
       "test_report_list": [
         {
@@ -5610,6 +5786,16 @@
       "website": "https://testenterprise.com"
     },
     "application": {
+      "request_type": "សាកល្បង",
+      "license_type": "សាកល្បង",
+      "old_license": "LIC-2021-003",
+      "old_license_date": "2021-02-01",
+      "house_number": "45",
+      "street": "ផ្លូវលេខ ១២៣",
+      "village_id": 1030201,
+      "commune_id": 10302,
+      "district_id": 103,
+      "province_id": 1,
       "owner": {
         "full_name_kh": "ម៉ាការា សុខ",
         "position": "ប្រធានគ្រប់គ្រង / General Manager",
@@ -5617,13 +5803,7 @@
         "gender": 1,
         "nationality": "ខ្មែរ / Cambodian",
         "phone": "012345678",
-        "email": "makara.sok@test.com",
-        "house_number": "45",
-        "street": "ផ្លូវលេខ ១២៣",
-        "village_id": 1030201,
-        "commune_id": 10302,
-        "district_id": 103,
-        "province_id": 1
+        "email": "makara.sok@test.com"
       },
       "factory": {
         "name_km": "សាកល្បង",
@@ -5649,10 +5829,6 @@
         "referred_standard": "CS 001:2020"
       },
       "request_info": {
-        "product_type": "1",
-        "certificate_name": "សាកល្បង / Test",
-        "certification_number": "CERT-2024-9988",
-        "issue_date": "2025-01-01",
         "primary_hygiene_certificate_number": "PHC-2024-1122",
         "primary_hygiene_certificate_issue_date": "2024-01-10",
         "trademark": "Test Brand"
@@ -5669,6 +5845,10 @@
         "product_label": {
           "url": "/uploads/product_label.pdf",
           "filename": "product_label.pdf"
+        },
+        "conformity_certificate": {
+          "url": "/uploads/conformity_certificate.pdf",
+          "filename": "conformity_certificate.pdf"
         }
       }
     }
@@ -5703,6 +5883,16 @@
       "website": "https://testenterprise.com"
     },
     "application": {
+      "request_type": "សាកល្បង",
+      "license_type": 1,
+      "old_license": "LIC-2021-003",
+      "old_license_date": "2021-02-01",
+      "house_number": "45",
+      "street": "ផ្លូវលេខ ១២៣",
+      "village_id": 1030201,
+      "commune_id": 10302,
+      "district_id": 103,
+      "province_id": 1,
       "owner": {
         "full_name_kh": "ម៉ាការា សុខ",
         "position": "ប្រធានគ្រប់គ្រង / General Manager",
@@ -5710,13 +5900,7 @@
         "gender": 1,
         "nationality": "ខ្មែរ / Cambodian",
         "phone": "012345678",
-        "email": "makara.sok@test.com",
-        "house_number": "45",
-        "street": "ផ្លូវលេខ ១២៣",
-        "village_id": 1030201,
-        "commune_id": 10302,
-        "district_id": 103,
-        "province_id": 1
+        "email": "makara.sok@test.com"
       },
       "factory": {
         "name_km": "សាកល្បង",
@@ -5754,6 +5938,10 @@
         "compliant_product_test_results": {
           "url": "/uploads/compliant_product_test_results.pdf",
           "filename": "compliant_product_test_results.pdf"
+        },
+        "conformity_certificate": {
+          "url": "/uploads/conformity_certificate.pdf",
+          "filename": "conformity_certificate.pdf"
         }
       }
     }
@@ -5790,7 +5978,7 @@
     "application": {
       "version": 1,
       "type": "សាកល្បង",
-      "agree": true,
+      "agree": "",
       "factory": {
         "name": "សាកល្បង / Test",
         "country": 1,
@@ -5798,6 +5986,10 @@
         "location_lat": 11.569188790149347,
         "location_lng": 104.92447938383688
       },
+      "province_id": 1,
+      "district_id": 103,
+      "commune_id": 10302,
+      "village_id": 1030201,
       "representative": {
         "name_km": "ម៉ាការា សុខ",
         "name_en": "Makara Sok",
@@ -5826,9 +6018,9 @@
           "url": "/uploads/prakas_and_operation_certificate.pdf",
           "filename": "prakas_and_operation_certificate.pdf"
         },
-        "business_registration_certificate": {
-          "url": "/uploads/business_registration_certificate.pdf",
-          "filename": "business_registration_certificate.pdf"
+        "nomination_letter": {
+          "url": "/uploads/nomination_letter.pdf",
+          "filename": "nomination_letter.pdf"
         },
         "representative_id": {
           "url": "/uploads/representative_id.pdf",
@@ -5881,7 +6073,7 @@
     },
     "application": {
       "version": 1,
-      "agree": true,
+      "agree": "",
       "license_activity": "USE",
       "applicant_information": {
         "name": "សាកល្បង / Test",
@@ -6011,7 +6203,7 @@
     },
     "application": {
       "version": 1,
-      "agree": true,
+      "agree": "",
       "manager": {
         "name_km": "ម៉ាការា សុខ",
         "name_en": "Makara Sok",
@@ -6043,10 +6235,6 @@
         "prakas_and_operation_certificate": {
           "url": "/uploads/prakas_and_operation_certificate.pdf",
           "filename": "prakas_and_operation_certificate.pdf"
-        },
-        "business_registration_certificate": {
-          "url": "/uploads/business_registration_certificate.pdf",
-          "filename": "business_registration_certificate.pdf"
         },
         "manager_id": {
           "url": "/uploads/manager_id.pdf",
@@ -6105,7 +6293,7 @@
     },
     "application": {
       "version": 1,
-      "agree": true,
+      "agree": "",
       "applicant": {
         "id": "000123456789",
         "name_km": "asdfasdf",
@@ -6203,7 +6391,7 @@
     },
     "application": {
       "version": 1,
-      "agree": true,
+      "agree": "",
       "applicant": {
         "id": "000123456789",
         "name_km": "asdfasdf",
@@ -6710,7 +6898,7 @@
         }
       },
       "is_fetched_from_camdx": false,
-      "is_declaration_accepted": true
+      "is_declaration_accepted": false
     }
   }
 }

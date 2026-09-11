@@ -1,7 +1,7 @@
 # Bampenh (បំពេញ) — Universal Form Autofill
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome_Extension-Manifest_V3-4285F4?logo=googlechrome&logoColor=white)](manifest.json)
-[![Version](https://img.shields.io/badge/version-2.0.0-indigo.svg)](manifest.json)
+[![Version](https://img.shields.io/badge/version-2.2.0-indigo.svg)](manifest.json)
 [![Platform](https://img.shields.io/badge/platform-Chromium_|_Chrome_|_Edge_|_Brave-blue.svg)](#installation)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](#license)
 
@@ -15,6 +15,7 @@ Unlike standard autofill tools that rely on plain DOM assignments (`el.value = .
 
 - **Universal Framework Support**: Safely drives React, Vue, and Angular forms by invoking native prototype property descriptors and triggering full input event lifecycles (`keydown`, `InputEvent` with `insertText`, `change`, and `click`).
 - **Semantic Field Matching**: Heuristic scoring engine that evaluates field labels, placeholders, input types, `name`, `id`, `aria-label`, autocomplete attributes, nearby context, and semantic synonyms to map profile keys accurately.
+- **Visa & Payment Card Autofill**: Intelligent credit/debit card form detection (card number, expiration date, separate month/year selects, CVV/CVC, cardholder name, and brand selector) with support for standard, masked, 4-box split, and iframe-embedded payment forms. Includes a dedicated one-click **Fill Visa Card** action.
 - **Deep MISTI Portal Integration**: Dedicated adapters covering all 45 public service forms (`GD_IND_*`, `GD_SMEH_*`, `GD_WAT_*`, `ISC_*`, `NMC_*`, `STINL_*`, `GD_AC_*`) with reactive state injection in the page's `MAIN` world.
 - **Cascading Address Resolution**: Automated hierarchical settlement for administrative divisions (`province_id` → `district_id` → `commune_id` → `village_id`) with watcher debounce settling.
 - **Dynamic Complex Tables**: Full schema-driven table generation (such as equipment lists in `GD_IND_SSI145` and multi-factory registries in `NMC_FORM_CAV168`).
@@ -65,6 +66,7 @@ Enterprise portals such as MISTI draft applications feature dynamic Khmer-langua
 | **Multiline Text** | `<textarea>`, `[contenteditable="true"]` | Textarea setter / Range insertion |
 | **Dropdowns** | Standard `<select>`, custom comboboxes, `.csel` | Fuzzy matching against option text and values |
 | **Selections** | `checkbox`, `radio` groups | Boolean parsing and radio-group resolution |
+| **Payment Cards** | `cardnumber`, `ccexp`, `expmonth`, `expyear`, `cvv`, `cardholder`, brand | Card number (single/spaced/split), expiration formats, CVV, and brand resolution |
 | **Date & Time** | `date`, `datetime-local`, `month`, `week`, `time` | ISO standard formatting & date-picker integration |
 | **Attachments** | Standard file inputs (`<input type="file">`), upload widgets | Synthetic valid PDF/PNG data payloads |
 | **Hierarchies** | Khmer administrative address cascades | Sequential async cascading with watcher settling |
@@ -103,13 +105,25 @@ Enterprise portals such as MISTI draft applications feature dynamic Khmer-langua
 3. Click **Save**.
 4. Return to the **Fill** tab and click **Fill from your data**.
 
-### 3. Page Analysis & Field Suggestions
+### 3. Visa Card Autofill
+1. Open any payment, checkout, or billing form.
+2. Click the **Bampenh** extension icon.
+3. On the **Fill** tab, click the dedicated **Fill Visa Card** button.
+4. The extension automatically detects and fills the Visa test credentials:
+   - **Card Number**: `4286 0900 0000 0206` (or `4286090000000206` / 4-split inputs)
+   - **Expiration**: `04/30` (or `04/2030`, `0430`, or separate Month `04` and Year `2030` selects/inputs)
+   - **Security Code (CVV)**: `777`
+   - **Cardholder Name**: `Visa Card`
+   - **Card Brand**: Selects `Visa` if a brand dropdown or radio group is present.
+5. Card fields are also automatically filled when using **Fill with test data** or **Fill from your data** whenever card forms are encountered.
+
+### 4. Page Analysis & Field Suggestions
 1. Switch to the **Suggest** tab.
 2. Click **Analyze this page**.
 3. Bampenh will inspect every fillable element in the current DOM and present proposed values for review.
 4. Adjust any field value inline and click **Apply all**.
 
-### 4. Overwrite Protection
+### 5. Overwrite Protection
 By default, Bampenh does not overwrite fields that already contain values. Check the **"Overwrite fields that already have a value"** checkbox if you wish to force a complete re-fill.
 
 ---

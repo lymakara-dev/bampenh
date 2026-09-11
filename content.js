@@ -13,8 +13,8 @@
  * ========================================================================== */
 
 (() => {
-  // Guard against double-injection (popup may inject more than once).
-  if (window.__UNIVERSAL_AUTOFILL_LOADED__) return;
+  // Guard against duplicate event listeners, but allow re-injection to refresh functions
+  const alreadyLoaded = !!window.__UNIVERSAL_AUTOFILL_LOADED__;
   window.__UNIVERSAL_AUTOFILL_LOADED__ = true;
 
   /* ----------------------------- utilities ------------------------------ */
@@ -49,17 +49,30 @@
 
   // React/Vue-safe value setter.
   const setNativeValue = (element, value) => {
-    const proto = Object.getPrototypeOf(element);
-    const ownDesc = Object.getOwnPropertyDescriptor(element, "value");
-    const protoDesc = Object.getOwnPropertyDescriptor(proto, "value");
-    const ownSetter = ownDesc && ownDesc.set;
-    const protoSetter = protoDesc && protoDesc.set;
-    if (protoSetter && ownSetter !== protoSetter) {
-      protoSetter.call(element, value);
-    } else if (ownSetter) {
-      ownSetter.call(element, value);
+    let setter = null;
+    const win = element.ownerDocument?.defaultView || window;
+    if (typeof win.HTMLInputElement !== "undefined" && element instanceof win.HTMLInputElement) {
+      setter = Object.getOwnPropertyDescriptor(win.HTMLInputElement.prototype, "value")?.set;
+    } else if (typeof win.HTMLTextAreaElement !== "undefined" && element instanceof win.HTMLTextAreaElement) {
+      setter = Object.getOwnPropertyDescriptor(win.HTMLTextAreaElement.prototype, "value")?.set;
+    } else if (typeof win.HTMLSelectElement !== "undefined" && element instanceof win.HTMLSelectElement) {
+      setter = Object.getOwnPropertyDescriptor(win.HTMLSelectElement.prototype, "value")?.set;
+    }
+    if (setter) {
+      setter.call(element, value);
     } else {
-      element.value = value;
+      const proto = Object.getPrototypeOf(element);
+      const ownDesc = Object.getOwnPropertyDescriptor(element, "value");
+      const protoDesc = proto ? Object.getOwnPropertyDescriptor(proto, "value") : null;
+      const ownSetter = ownDesc && ownDesc.set;
+      const protoSetter = protoDesc && protoDesc.set;
+      if (protoSetter && ownSetter !== protoSetter) {
+        protoSetter.call(element, value);
+      } else if (ownSetter) {
+        ownSetter.call(element, value);
+      } else {
+        element.value = value;
+      }
     }
   };
 
@@ -134,10 +147,13 @@
 
     push(el.name);
     push(el.id);
+    push(el.className);
     push(el.getAttribute("placeholder"));
     push(el.getAttribute("aria-label"));
+    push(el.getAttribute("aria-placeholder"));
     push(el.getAttribute("autocomplete"));
     push(el.getAttribute("title"));
+    push(el.getAttribute("data-maska"));
 
     const container = el.closest('.form-input-container');
     if (container) {
@@ -204,6 +220,139 @@
     title: ["title", "salutation", "prefix"],
     website: ["website", "url", "homepage", "web"],
     occupation: ["occupation", "job", "jobtitle", "profession", "position"],
+    cardnumber: [
+      "cardnumber",
+      "card_number",
+      "cardno",
+      "card_no",
+      "cardnum",
+      "card_num",
+      "creditcard",
+      "creditcardnumber",
+      "credit_card",
+      "credit_card_number",
+      "debitcard",
+      "visacard",
+      "ccnumber",
+      "cc_number",
+      "ccnum",
+      "cc_num",
+      "cclast4",
+      "pan",
+      "accountnumber",
+      "account_number",
+      "input-card-number",
+      "លេខកាត",
+      "លេខប័ណ្ណ",
+      "កាតឥណទាន",
+      "កាតឥណពន្ធ",
+      "កាត",
+    ],
+    cardexp: [
+      "cardexp",
+      "card_exp",
+      "ccexp",
+      "cc_exp",
+      "expiry",
+      "expiration",
+      "expdate",
+      "exp_date",
+      "expirationdate",
+      "expiration_date",
+      "validthru",
+      "valid_thru",
+      "mmyy",
+      "input-card-expired",
+      "កាលបរិច្ឆេទផុតកំណត់",
+      "ថ្ងៃផុតកំណត់",
+      "ផុតកំណត់",
+    ],
+    cardmonth: [
+      "cardmonth",
+      "card_month",
+      "expmonth",
+      "exp_month",
+      "expirymonth",
+      "expiry_month",
+      "ccmonth",
+      "cc_month",
+      "ccexpmonth",
+      "ccexpmo",
+      "expiremonth",
+      "expire_month",
+      "ខែផុតកំណត់",
+    ],
+    cardyear: [
+      "cardyear",
+      "card_year",
+      "expyear",
+      "exp_year",
+      "expiryyear",
+      "expiry_year",
+      "ccyear",
+      "cc_year",
+      "ccexpyear",
+      "ccexpyr",
+      "expireyear",
+      "expire_year",
+      "ឆ្នាំផុតកំណត់",
+    ],
+    cardcvv: [
+      "cardcvv",
+      "card_cvv",
+      "cvv",
+      "cvc",
+      "csc",
+      "cid",
+      "cvv2",
+      "cvc2",
+      "securitycode",
+      "security_code",
+      "verificationcode",
+      "verification_code",
+      "cardcode",
+      "card_code",
+      "cccvv",
+      "cc_cvv",
+      "cccvc",
+      "cc_cvc",
+      "input-card-cvv",
+      "កូដសុវត្ថិភាព",
+      "លេខសម្ងាត់កាត",
+      "លេខកូដសម្ងាត់",
+    ],
+    cardholder: [
+      "cardholder",
+      "card_holder",
+      "cardholdername",
+      "cardholder_name",
+      "nameoncard",
+      "name_on_card",
+      "cardname",
+      "card_name",
+      "ccname",
+      "cc_name",
+      "cardowner",
+      "card_owner",
+      "ឈ្មោះម្ចាស់កាត",
+      "ឈ្មោះលើកាត",
+      "ឈ្មោះម្ចាស់ប័ណ្ណ",
+    ],
+    cardtype: [
+      "cardtype",
+      "card_type",
+      "cardbrand",
+      "card_brand",
+      "cctype",
+      "cc_type",
+      "paymenttype",
+      "paymentmethod",
+      "paymentoption",
+      "payment_option",
+      "វិធីសាស្ត្រទូទាត់",
+      "ជម្រើសបង់ប្រាក់",
+      "ប្រភេទកាត",
+    ],
   };
 
   // Build a flat lookup of every synonym token -> canonical key.
@@ -251,6 +400,215 @@
     return best;
   };
 
+  /* --------------------------- visa card support ----------------------- */
+
+  const VISA_CARD = {
+    holder: "Visa Card",
+    numberSpaced: "4286 0900 0000 0206",
+    numberClean: "4286090000000206",
+    exp: "04/30",
+    expClean: "0430",
+    expSpaced: "04 / 30",
+    expFullYear: "04/2030",
+    month: "04",
+    monthNum: "4",
+    year: "30",
+    yearFull: "2030",
+    cvv: "777",
+    brand: "Visa",
+  };
+
+  const getCardNumberPartIndex = (el) => {
+    if (!el) return -1;
+    const raw = [el.name, el.id, el.getAttribute("data-index")].filter(Boolean).join(" ").toLowerCase();
+    const m = raw.match(/(?:card|cc|pan|num).*?(?:[_\-[\]\s]*([1-4]|[0-3]))$/i) ||
+              raw.match(/(?:part|box|chunk)[_\-[\]\s]*([1-4]|[0-3])/i);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      if (n >= 1 && n <= 4) return n - 1;
+      if (n >= 0 && n <= 3) return n;
+    }
+    const parent = el.closest(".card-number, .card_number, .cc-number, fieldset, .form-group, div");
+    if (parent) {
+      const inputs = Array.from(parent.querySelectorAll('input:not([type="hidden"])'));
+      if (inputs.length === 4 && inputs.every((inp) => inp.maxLength === 4 || inp.size === 4)) {
+        return inputs.indexOf(el);
+      }
+    }
+    return -1;
+  };
+
+  const classifyCardField = (el) => {
+    if (!el) return null;
+    const tag = el.tagName.toLowerCase();
+    const type = (el.getAttribute("type") || el.type || "").toLowerCase();
+    if (["hidden", "submit", "reset", "button", "image", "file"].includes(type)) return null;
+
+    const autocomplete = (el.getAttribute("autocomplete") || "").toLowerCase();
+    if (autocomplete === "cc-number") return "cardnumber";
+    if (autocomplete === "cc-exp") return "cardexp";
+    if (autocomplete === "cc-exp-month") return "cardmonth";
+    if (autocomplete === "cc-exp-year") return "cardyear";
+    if (autocomplete === "cc-csc" || autocomplete === "cc-cvv") return "cardcvv";
+    if (autocomplete === "cc-name") return "cardholder";
+    if (autocomplete === "cc-type") return "cardtype";
+
+    const clues = describeField(el);
+    const raw = clues.join(" ").toLowerCase();
+
+    // 1. CVV / CVC / Security code (check first to avoid card number matching "card security code")
+    if (
+      /(?:\b|^)(?:cvv|cvc|csc|cid|cvv2|cvc2)(?:\b|$)/i.test(raw) ||
+      /(?:security|verification|cvv|cvc|csc)[\s_-]*code/i.test(raw) ||
+      /card[\s_-]*verification/i.test(raw) ||
+      /card[\s_-]*code/i.test(raw) ||
+      /security[\s_-]*number/i.test(raw) ||
+      /(?:input-card-cvv|card-cvv|pw-input-card-cvv)/i.test(raw) ||
+      /(?:កូដសុវត្ថិភាព|លេខសម្ងាត់កាត|លេខកូដសម្ងាត់)/i.test(raw)
+    ) {
+      return "cardcvv";
+    }
+
+    // 2. Cardholder Name (check before card number and generic name)
+    if (
+      /card[\s_-]*holder/i.test(raw) ||
+      /name[\s_-]*on[\s_-]*card/i.test(raw) ||
+      /card[\s_-]*name/i.test(raw) ||
+      /cc[\s_-]*name/i.test(raw) ||
+      /card[\s_-]*owner/i.test(raw) ||
+      (/owner[\s_-]*name/i.test(raw) && /card|credit|payment/i.test(raw)) ||
+      /(?:ឈ្មោះម្ចាស់កាត|ឈ្មោះលើកាត|ឈ្មោះម្ចាស់ប័ណ្ណ)/i.test(raw)
+    ) {
+      return "cardholder";
+    }
+
+    // 3. Card Type / Brand (select or radio)
+    if (tag === "select" || type === "radio" || (typeof isCustomDropdown === "function" && isCustomDropdown(el))) {
+      if (
+        /card[\s_-]*(?:type|brand)|credit[\s_-]*card[\s_-]*type|payment[\s_-]*(?:method|type|option)/i.test(raw) ||
+        /(?:វិធីសាស្ត្រទូទាត់|ជម្រើសបង់ប្រាក់|ប្រភេទកាត)/i.test(raw)
+      ) {
+        return "cardtype";
+      }
+    }
+
+    // 4. Expiration Date (combined Month & Year)
+    if (
+      autocomplete === "cc-exp" ||
+      /mm\s*[\/\-]\s*yy/i.test(raw) ||
+      /\bmmyy\b/i.test(raw) ||
+      /\b(?:validthru|valid_thru|valid-thru|ccexp|cardexp|card_exp|card-exp|expdate|expiry_date)\b/i.test(raw) ||
+      /(?:input-card-expired|card-expired|pw-input-card-expired)/i.test(raw) ||
+      (/(?:exp|expiry|expiration)[\s_-]*date/i.test(raw) && !/(?:month|year)/i.test(raw)) ||
+      (/(?:exp|expiry|expiration)/i.test(raw) && !/(?:month|year)/i.test(raw) && tag !== "select") ||
+      /(?:កាលបរិច្ឆេទផុតកំណត់|ថ្ងៃផុតកំណត់|ផុតកំណត់)/i.test(raw)
+    ) {
+      return "cardexp";
+    }
+
+    // 5. Expiration Month
+    if (
+      autocomplete === "cc-exp-month" ||
+      /(?:exp|expiry|expiration)[\s_-]*month/i.test(raw) ||
+      /\b(?:expmonth|exp_month|exp-month|ccexpmonth|ccexpmo|cardmonth|expiry_month)\b/i.test(raw) ||
+      ((/\bmonth\b/i.test(raw) || (/\bmm\b/i.test(raw) && !/\byy\b/i.test(raw))) &&
+        /(?:card|cc|credit|debit|payment|exp|expiry)/i.test(raw) &&
+        !/(?:year|yy)/i.test(raw))
+    ) {
+      return "cardmonth";
+    }
+
+    // 6. Expiration Year
+    if (
+      autocomplete === "cc-exp-year" ||
+      /(?:exp|expiry|expiration)[\s_-]*year/i.test(raw) ||
+      /\b(?:expyear|exp_year|exp-year|ccexpyear|ccexpyr|cardyear|expiry_year)\b/i.test(raw) ||
+      ((/\byear\b/i.test(raw) || /\byyyy\b/i.test(raw) || (/\byy\b/i.test(raw) && !/\bmm\b/i.test(raw))) &&
+        /(?:card|cc|credit|debit|payment|exp|expiry)/i.test(raw) &&
+        !/(?:month|mm)/i.test(raw))
+    ) {
+      return "cardyear";
+    }
+
+    // 7. Card Number
+    const isExcluded =
+      /(?:gift|reward|member|identity|national|student|loyalty|id[\s_-]*card|id_number|nid)/i.test(raw) &&
+      !/(?:credit|debit|visa|mastercard|cc)/i.test(raw);
+
+    if (!isExcluded) {
+      if (getCardNumberPartIndex(el) !== -1) return "cardnumber";
+      if (
+        /(?:credit|debit|payment|visa|mastercard)[\s_-]*card[\s_-]*(?:number|no|num|#)?/i.test(raw) ||
+        /card[\s_-]*(?:number|no|num|#|digits)/i.test(raw) ||
+        /\b(?:cardnumber|cardno|cardnum|ccnumber|ccnum|cclast4|pan)\b/i.test(raw) ||
+        /credit[\s_-]*card/i.test(raw) ||
+        /\b(?:cc[\s_-]*num|cc[\s_-]*no)\b/i.test(raw) ||
+        /(?:input-card-number|card-number|pw-input-card-number)/i.test(raw) ||
+        /(?:លេខកាត|លេខប័ណ្ណ|កាតឥណទាន|កាតឥណពន្ធ)/i.test(raw)
+      ) {
+        return "cardnumber";
+      }
+      const ph = (el.getAttribute("placeholder") || "").toLowerCase();
+      if (/••••|0000[\s\-]*0000|1234[\s\-]*5678|4286/.test(ph)) {
+        return "cardnumber";
+      }
+    }
+
+    return null;
+  };
+
+  const getVisaCardValue = (cardField, el) => {
+    const tag = el ? el.tagName.toLowerCase() : "";
+    const type = el ? (el.type || "").toLowerCase() : "";
+    const maxLen = el && el.maxLength > 0 ? el.maxLength : 0;
+    const ph = el ? (el.getAttribute("placeholder") || "").toLowerCase() : "";
+    const maska = el ? (el.getAttribute("data-maska") || "").toLowerCase() : "";
+
+    switch (cardField) {
+      case "cardnumber": {
+        const partIdx = getCardNumberPartIndex(el);
+        if (partIdx !== -1) {
+          const parts = ["4286", "0900", "0000", "0206"];
+          return parts[partIdx];
+        }
+        if (type === "number" || (maxLen > 0 && maxLen < 19)) {
+          return VISA_CARD.numberClean;
+        }
+        return VISA_CARD.numberSpaced;
+      }
+      case "cardexp": {
+        if (maxLen === 4 || /mmyy/i.test(ph)) {
+          return VISA_CARD.expClean;
+        }
+        if (/yyyy/i.test(ph) || (maxLen === 7 && /yyyy/i.test(ph))) {
+          return VISA_CARD.expFullYear;
+        }
+        if (/mm\s*\/\s*yy/i.test(ph) || /##\s*\/\s*##/.test(maska) || maska.includes(" / ") || ph.includes(" / ")) {
+          return VISA_CARD.expSpaced;
+        }
+        return VISA_CARD.exp;
+      }
+      case "cardmonth": {
+        if (tag === "select") return VISA_CARD.month;
+        if (maxLen === 1) return VISA_CARD.monthNum;
+        return VISA_CARD.month;
+      }
+      case "cardyear": {
+        if (tag === "select") return VISA_CARD.yearFull;
+        if (maxLen === 4 || /yyyy/i.test(ph)) return VISA_CARD.yearFull;
+        return VISA_CARD.year;
+      }
+      case "cardcvv":
+        return VISA_CARD.cvv;
+      case "cardholder":
+        return VISA_CARD.holder;
+      case "cardtype":
+        return VISA_CARD.brand;
+      default:
+        return null;
+    }
+  };
+
   /* --------------------------- test data -------------------------------- */
 
   const SAMPLE = {
@@ -271,6 +629,9 @@
   };
 
   const guessTestValue = (el) => {
+    const cardCat = classifyCardField(el);
+    if (cardCat) return getVisaCardValue(cardCat, el);
+
     const tag = el.tagName.toLowerCase();
     if (tag === "textarea") return "This is sample test content for the field.";
     const type = (el.type || "text").toLowerCase();
@@ -298,6 +659,9 @@
   // what powers the "analyze the page and suggest a value" feature: we read
   // every clue the field exposes and decide what kind of data it wants.
   const classifyField = (el) => {
+    const cardCat = classifyCardField(el);
+    if (cardCat) return cardCat;
+
     const type = (el.type || "").toLowerCase();
     const tag = el.tagName.toLowerCase();
     if (type === "email") return "email";
@@ -351,6 +715,13 @@
 
   // A realistic sample value for each semantic category.
   const SAMPLES_BY_CATEGORY = {
+    cardnumber: VISA_CARD.numberSpaced,
+    cardexp: VISA_CARD.exp,
+    cardmonth: VISA_CARD.month,
+    cardyear: VISA_CARD.year,
+    cardcvv: VISA_CARD.cvv,
+    cardholder: VISA_CARD.holder,
+    cardtype: VISA_CARD.brand,
     email: "test.user@example.com",
     firstname: "Alex",
     lastname: "Morgan",
@@ -436,20 +807,45 @@
 
   const fillTextLike = (el, value) => {
     el.focus();
-    // Bracket the value change with keyboard events so keystroke-level
-    // validators (numeric-only fields, masks, etc.) treat it as real typing.
-    try {
-      el.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true }));
-    } catch (_) {
-      /* KeyboardEvent unsupported — ignore */
+    const strVal = String(value);
+    const win = el.ownerDocument?.defaultView || window;
+    const setter = Object.getOwnPropertyDescriptor(win.HTMLInputElement.prototype, "value")?.set;
+
+    // For masked fields (e.g. Maska v2 / PayWay card inputs), simulate progressive typing
+    const isMasked = el.hasAttribute("data-maska") || (el.className && /card|mask/i.test(el.className));
+    if (isMasked && strVal.length > 1) {
+      let curr = "";
+      for (let i = 0; i < strVal.length; i++) {
+        const ch = strVal[i];
+        curr += ch;
+        try { el.dispatchEvent(new win.KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: ch })); } catch (_) {}
+        try { el.dispatchEvent(new win.InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "insertText", data: ch })); } catch (_) {}
+        if (setter) setter.call(el, curr);
+        else el.value = curr;
+        try { el.dispatchEvent(new win.InputEvent("input", { bubbles: true, cancelable: true, inputType: "insertText", data: ch })); } catch (_) {
+          el.dispatchEvent(new win.Event("input", { bubbles: true }));
+        }
+        try { el.dispatchEvent(new win.KeyboardEvent("keyup", { bubbles: true, cancelable: true, key: ch })); } catch (_) {}
+      }
     }
-    setNativeValue(el, value);
+
+    const lastChar = strVal.slice(-1);
+    try {
+      el.dispatchEvent(new win.KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: lastChar }));
+    } catch (_) {}
+    try {
+      el.dispatchEvent(new win.InputEvent("beforeinput", {
+        bubbles: true,
+        cancelable: true,
+        inputType: "insertText",
+        data: strVal,
+      }));
+    } catch (_) {}
+    setNativeValue(el, strVal);
     fireEvents(el, ["input"]);
     try {
-      el.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, cancelable: true }));
-    } catch (_) {
-      /* ignore */
-    }
+      el.dispatchEvent(new win.KeyboardEvent("keyup", { bubbles: true, cancelable: true, key: lastChar }));
+    } catch (_) {}
     fireEvents(el, ["change", "blur"]);
     return true;
   };
@@ -698,10 +1094,12 @@
     const type = (el.type || "").toLowerCase();
     if (DATE_INPUT_TYPES.has(type)) return true;
     if (el.tagName.toLowerCase() !== "input") return false;
+    if (classifyCardField(el) === "cardexp") return false;
+    const text = describeField(el).map(normalize).join(" ");
+    if (/\b(?:exp|expiry|expiration|ccexp|cardexp|ផុតកំណត់)\b/.test(text)) return false;
     if (isVueDatetime(el)) return true; // vue-datetime: readonly .vdatetime-input
     if (type && type !== "text" && type !== "search") return false;
     if (detectDatePattern(el)) return true;
-    const text = describeField(el).map(normalize).join(" ");
     return /\bdate\b|\bdob\b|dateofbirth|birthdate|birthday|calendar/.test(text);
   };
 
@@ -1291,7 +1689,41 @@
 
     // Fill one control; returns true if it actually changed something.
     const fillField = async (el) => {
+      const cardCat = classifyCardField(el);
+      const tag = el.tagName.toLowerCase();
+      const type = (el.type || "").toLowerCase();
+
       if (mode === "test") {
+        if (cardCat) {
+          if (cardCat === "cardmonth" && (tag === "select" || isCustomDropdown(el))) {
+            return fillCardMonthControl(el);
+          }
+          if (cardCat === "cardyear" && (tag === "select" || isCustomDropdown(el))) {
+            return fillCardYearControl(el);
+          }
+          if (cardCat === "cardtype") {
+            if (tag === "select") return fillSelect(el, VISA_CARD.brand);
+            if (type === "radio" && el.name) {
+              const group = Array.from(document.querySelectorAll(`input[type=radio][name="${CSS.escape(el.name)}"]`));
+              let ok = fillRadioGroup(group, VISA_CARD.brand);
+              if (!ok) {
+                const cardKeywords = ["cards", "card", "credit", "creditcard", "cc", "visa"];
+                for (const kw of cardKeywords) {
+                  ok = fillRadioGroup(group, kw);
+                  if (ok) break;
+                }
+              }
+              if (ok) handledRadioGroups.add(el.name);
+              return ok;
+            }
+            return fillTextLike(el, VISA_CARD.brand);
+          }
+          if (cardCat === "cardexp" || cardCat === "cardnumber" || cardCat === "cardcvv" || cardCat === "cardholder") {
+            const val = getVisaCardValue(cardCat, el);
+            return val !== null && val !== undefined ? fillTextLike(el, val) : false;
+          }
+          return await fillByType(el, getVisaCardValue(cardCat, el), handledRadioGroups);
+        }
         return isCustomDropdown(el)
           ? await fillCustomDropdown(el, null, { first: true })
           : await fillByType(el, guessTestValueForControl(el), handledRadioGroups);
@@ -1312,6 +1744,43 @@
         const ok = await applyValue(el, profile[bestKey], overwrite, handledRadioGroups);
         if (ok) result.details.push({ field: clues[0] || el.name || el.id, key: bestKey, score: bestScore });
         return ok;
+      }
+      // Auto-fill with Visa Card if meeting a card field not defined in profile
+      if (cardCat) {
+        let ok = false;
+        if (cardCat === "cardmonth" && (tag === "select" || isCustomDropdown(el))) {
+          ok = fillCardMonthControl(el);
+        } else if (cardCat === "cardyear" && (tag === "select" || isCustomDropdown(el))) {
+          ok = fillCardYearControl(el);
+        } else if (cardCat === "cardtype") {
+          if (tag === "select") ok = fillSelect(el, VISA_CARD.brand);
+          else if (type === "radio" && el.name) {
+            const group = Array.from(document.querySelectorAll(`input[type=radio][name="${CSS.escape(el.name)}"]`));
+            ok = fillRadioGroup(group, VISA_CARD.brand);
+            if (!ok) {
+              const cardKeywords = ["cards", "card", "credit", "creditcard", "cc", "visa"];
+              for (const kw of cardKeywords) {
+                ok = fillRadioGroup(group, kw);
+                if (ok) break;
+              }
+            }
+            if (ok) handledRadioGroups.add(el.name);
+          } else ok = fillTextLike(el, VISA_CARD.brand);
+        } else if (cardCat === "cardexp" || cardCat === "cardnumber" || cardCat === "cardcvv" || cardCat === "cardholder") {
+          const val = getVisaCardValue(cardCat, el);
+          if (val !== null && val !== undefined) {
+            ok = fillTextLike(el, val);
+          }
+        } else {
+          const val = getVisaCardValue(cardCat, el);
+          if (val !== null && val !== undefined) {
+            ok = await applyValue(el, val, overwrite, handledRadioGroups);
+          }
+        }
+        if (ok) {
+          result.details.push({ field: clues[0] || el.name || el.id, key: `visa_${cardCat}`, score: 100 });
+          return ok;
+        }
       }
       return false;
     };
@@ -1437,9 +1906,189 @@
     return fillTextLike(el, value);
   };
 
+  /* ----------------------- visa card filling ---------------------------- */
+
+  const fillCardMonthControl = (el) => {
+    const tag = el.tagName.toLowerCase();
+    if (tag === "select") {
+      const targets = ["04", "4", "april", "apr"];
+      for (const opt of el.options) {
+        const v = normalize(opt.value);
+        const t = normalize(opt.textContent);
+        if (targets.some((want) => v === want || t === want || t.startsWith("04") || t.startsWith("4-") || t.startsWith("4 "))) {
+          el.focus();
+          setNativeValue(el, opt.value);
+          fireEvents(el, ["input", "change", "blur"]);
+          return true;
+        }
+      }
+      return fillSelect(el, "04");
+    }
+    if (isCustomDropdown(el)) {
+      return fillCustomDropdown(el, "04") || fillCustomDropdown(el, "April");
+    }
+    return fillTextLike(el, "04");
+  };
+
+  const fillCardYearControl = (el) => {
+    const tag = el.tagName.toLowerCase();
+    if (tag === "select") {
+      const targets = ["2030", "30"];
+      for (const opt of el.options) {
+        const v = normalize(opt.value);
+        const t = normalize(opt.textContent);
+        if (targets.some((want) => v === want || t === want || t.includes("2030") || t.endsWith("30"))) {
+          el.focus();
+          setNativeValue(el, opt.value);
+          fireEvents(el, ["input", "change", "blur"]);
+          return true;
+        }
+      }
+      return fillSelect(el, "2030") || fillSelect(el, "30");
+    }
+    if (isCustomDropdown(el)) {
+      return fillCustomDropdown(el, "2030") || fillCustomDropdown(el, "30");
+    }
+    return fillTextLike(el, "30");
+  };
+
+  const formatCardFieldName = (cat) => {
+    switch (cat) {
+      case "cardnumber": return "Card Number";
+      case "cardexp": return "Expiration Date";
+      case "cardmonth": return "Exp Month";
+      case "cardyear": return "Exp Year";
+      case "cardcvv": return "CVV";
+      case "cardholder": return "Cardholder Name";
+      case "cardtype": return "Card Type";
+      default: return cat;
+    }
+  };
+
+  const fillVisaCard = async (overwrite = false) => {
+    const result = { filled: 0, skipped: 0, details: [] };
+    const handledRadioGroups = new Set();
+    const handled = new WeakSet();
+
+    let fields = collectFields();
+    // Explicitly add specific card inputs in case isVisible filtered them out during layout/animation
+    const specificCardInputs = Array.from(document.querySelectorAll(
+      '#cardNumber, [name="cardNumber"], .input-card-number, #cardExp, [name="cardExp"], .input-card-expired, #cvv2, [name="cvv2"], #cvv, [name="cvv"], .input-card-cvv, #cardHolder, [name="cardHolder"], input[data-maska], input[autocomplete*="cc-"]'
+    ));
+    for (const cinp of specificCardInputs) {
+      if (!fields.includes(cinp)) fields.push(cinp);
+    }
+
+    let hasCard = fields.some((el) => classifyCardField(el) || getCardNumberPartIndex(el) !== -1);
+    if (!hasCard) {
+      await wait(300);
+      fields = collectFields();
+      for (const cinp of specificCardInputs) {
+        if (!fields.includes(cinp)) fields.push(cinp);
+      }
+    }
+
+    // Check for 4-part split card number inputs
+    let splitCardInputs = [];
+    for (const el of fields) {
+      const idx = getCardNumberPartIndex(el);
+      if (idx !== -1) {
+        splitCardInputs[idx] = el;
+      }
+    }
+    if (splitCardInputs.length === 4 && splitCardInputs.every(Boolean)) {
+      const parts = ["4286", "0900", "0000", "0206"];
+      for (let i = 0; i < 4; i++) {
+        const el = splitCardInputs[i];
+        if (handled.has(el)) continue;
+        if (fillTextLike(el, parts[i])) {
+          handled.add(el);
+          result.filled++;
+        }
+      }
+      if (result.filled > 0) {
+        result.details.push("Card Number");
+      }
+    }
+
+    for (const el of fields) {
+      if (handled.has(el)) continue;
+
+      const cardCat = classifyCardField(el);
+      if (!cardCat) continue;
+
+      const tag = el.tagName.toLowerCase();
+      const type = (el.type || "").toLowerCase();
+
+      if (type === "radio" && el.name && handledRadioGroups.has(el.name)) {
+        handled.add(el);
+        continue;
+      }
+
+      const hasValue =
+        (tag === "select" && el.value) ||
+        (type === "checkbox" || type === "radio" ? false : el.value) ||
+        (el.isContentEditable && el.textContent.trim());
+
+      const isCardInput = cardCat === "cardnumber" || cardCat === "cardexp" || cardCat === "cardcvv" || cardCat === "cardholder";
+      if (hasValue && !overwrite && !isCardInput) {
+        handled.add(el);
+        result.skipped++;
+        continue;
+      }
+
+      let ok = false;
+
+      if (cardCat === "cardmonth" && (tag === "select" || isCustomDropdown(el))) {
+        ok = fillCardMonthControl(el);
+      } else if (cardCat === "cardyear" && (tag === "select" || isCustomDropdown(el))) {
+        ok = fillCardYearControl(el);
+      } else if (cardCat === "cardtype") {
+        if (tag === "select") {
+          ok = fillSelect(el, VISA_CARD.brand);
+        } else if (type === "radio" && el.name) {
+          const group = Array.from(document.querySelectorAll(`input[type=radio][name="${CSS.escape(el.name)}"]`));
+          ok = fillRadioGroup(group, VISA_CARD.brand);
+          if (!ok) {
+            const cardKeywords = ["cards", "card", "credit", "creditcard", "cc", "visa"];
+            for (const kw of cardKeywords) {
+              ok = fillRadioGroup(group, kw);
+              if (ok) break;
+            }
+          }
+          if (ok) handledRadioGroups.add(el.name);
+        } else {
+          ok = fillTextLike(el, VISA_CARD.brand);
+        }
+      } else if (cardCat === "cardexp" || cardCat === "cardnumber" || cardCat === "cardcvv" || cardCat === "cardholder") {
+        const val = getVisaCardValue(cardCat, el);
+        if (val !== null && val !== undefined) {
+          ok = fillTextLike(el, val);
+        }
+      } else {
+        const val = getVisaCardValue(cardCat, el);
+        if (val !== null && val !== undefined) {
+          ok = await applyValue(el, val, overwrite, handledRadioGroups);
+        }
+      }
+
+      handled.add(el);
+      if (ok) {
+        result.filled++;
+        result.details.push(formatCardFieldName(cardCat));
+      } else {
+        result.skipped++;
+      }
+    }
+
+    result.details = Array.from(new Set(result.details));
+    return result;
+  };
+
   /* --------------------------- messaging -------------------------------- */
 
-  chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  if (!alreadyLoaded && typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
+    chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     // Work is async (custom dropdowns need to open and wait for options), so
     // run it in an IIFE and return true synchronously to keep the channel open.
     (async () => {
@@ -1450,6 +2099,13 @@
             mode: msg.mode || "profile",
             overwrite: !!msg.overwrite,
           });
+          sendResponse({ ok: true, ...result });
+        } catch (e) {
+          sendResponse({ ok: false, error: e.message });
+        }
+      } else if (msg && msg.action === "fillVisa") {
+        try {
+          const result = await fillVisaCard(!!msg.overwrite);
           sendResponse({ ok: true, ...result });
         } catch (e) {
           sendResponse({ ok: false, error: e.message });
@@ -1522,5 +2178,70 @@
       }
     })();
     return true; // keep the message channel open for the async response
-  });
+    });
+  }
+
+  window.__bampenhHandleMessage = async (msg) => {
+    if (!msg) return null;
+    if (msg.action === "fill") {
+      const res = await run({
+        profile: msg.profile || {},
+        mode: msg.mode || "profile",
+        overwrite: !!msg.overwrite,
+      });
+      return { ok: true, ...res };
+    } else if (msg.action === "fillVisa") {
+      const res = await fillVisaCard(!!msg.overwrite);
+      return { ok: true, ...res };
+    } else if (msg.action === "scan") {
+      const fields = collectFields().map((el) => ({
+        tag: el.tagName.toLowerCase(),
+        type: el.type || "",
+        name: el.name || "",
+        id: el.id || "",
+        clues: describeField(el).slice(0, 4),
+      }));
+      return { ok: true, count: fields.length, fields };
+    } else if (msg.action === "suggest") {
+      const handledGroups = new Set();
+      const fields = [];
+      collectFields().forEach((el, i) => {
+        const type = (el.type || "").toLowerCase();
+        if (type === "radio" && el.name) {
+          if (handledGroups.has(el.name)) return;
+          handledGroups.add(el.name);
+        }
+        const uid = "bp" + i;
+        el.setAttribute("data-bampenh-uid", uid);
+        const suggestion = suggestForControl(el);
+        fields.push({
+          uid,
+          label: (describeField(el)[0] || el.name || el.id || "(unlabeled)").slice(0, 60),
+          tag: el.tagName.toLowerCase(),
+          type: el.type || "",
+          category: suggestion.category,
+          value: suggestion.value,
+        });
+      });
+      return { ok: true, count: fields.length, fields };
+    } else if (msg.action === "applySuggestions") {
+      const handledRadioGroups = new Set();
+      let filled = 0;
+      let skipped = 0;
+      for (const [uid, value] of Object.entries(msg.values || {})) {
+        const el = document.querySelector(`[data-bampenh-uid="${uid}"]`);
+        if (!el || value === "" || value == null) {
+          skipped++;
+          continue;
+        }
+        if (await fillByType(el, value, handledRadioGroups)) filled++;
+        else skipped++;
+      }
+      return { ok: true, filled, skipped };
+    } else if (msg.action === "clear") {
+      const res = clearAll();
+      return { ok: true, ...res };
+    }
+    return null;
+  };
 })();

@@ -22,6 +22,16 @@ try {
   if (ver && $(".ver")) $(".ver").textContent = `v${ver}`;
 } catch (_) {}
 
+// Auto-reload unpacked extension if new permissions in manifest need activation
+try {
+  if (!chrome.webNavigation && typeof chrome.runtime?.reload === "function") {
+    if (!sessionStorage.getItem("bampenh_manifest_reloaded")) {
+      sessionStorage.setItem("bampenh_manifest_reloaded", "1");
+      chrome.runtime.reload();
+    }
+  }
+} catch (_) {}
+
 /* ---------------------------- tabs ----------------------------------- */
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -64,11 +74,211 @@ async function activeTab() {
 }
 
 async function ensureInjected(tabId) {
-  // Inject the content script on demand (it guards against double-loading).
-  await chrome.scripting.executeScript({
-    target: { tabId },
-    files: ["content.js"],
-  });
+  // Inject the content script on demand into all reachable frames.
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId, allFrames: true },
+      files: ["content.js"],
+    });
+  } catch (_) {
+    // If allFrames fails (e.g. sandboxed iframe), inject into main frame first
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ["content.js"],
+      });
+    } catch (_) {}
+
+    // Then inject into each subframe individually if webNavigation is available
+    if (chrome.webNavigation && chrome.webNavigation.getAllFrames) {
+      try {
+        const frames = await chrome.webNavigation.getAllFrames({ tabId });
+        for (const frame of frames) {
+          if (frame.frameId === 0) continue;
+          try {
+            await chrome.scripting.executeScript({
+              target: { tabId, frameIds: [frame.frameId] },
+              files: ["content.js"],
+            });
+          } catch (_) {}
+        }
+      } catch (_) {}
+    }
+  }
+}
+
+async function executeOnAllFrames(tabId, message) {
+  let frameResults = [];
+
+  const directFrameExecutor = async (m) => {
+    // 1. If content script is active and has the handler, try it
+    if (typeof window.__bampenhHandleMessage === "function") {
+      try {
+        const res = await window.__bampenhHandleMessage(m);
+        if (res && res.filled > 0) return res;
+      } catch (_) {}
+    }
+
+    // 2. Direct DOM fallback for Visa card and payment options
+    const isVisa = m && (m.action === "fillVisa" || (m.action === "fill" && m.mode === "test"));
+    if (isVisa) {
+      const doc = document;
+      const win = window;
+      const result = { ok: true, filled: 0, skipped: 0, details: [] };
+
+      const fillInput = (el, val) => {
+        if (!el) return false;
+        el.focus();
+        const docView = el.ownerDocument?.defaultView || win;
+        const setter = Object.getOwnPropertyDescriptor(docView.HTMLInputElement.prototype, "value")?.set;
+
+        // Progressive keystroke typing simulation for masks (Maska v2)
+        const str = String(val);
+        let curr = "";
+        for (let i = 0; i < str.length; i++) {
+          const ch = str[i];
+          curr += ch;
+          try { el.dispatchEvent(new docView.KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: ch })); } catch (_) {}
+          try { el.dispatchEvent(new docView.InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "insertText", data: ch })); } catch (_) {}
+          if (setter) setter.call(el, curr);
+          else el.value = curr;
+          try { el.dispatchEvent(new docView.InputEvent("input", { bubbles: true, cancelable: true, inputType: "insertText", data: ch })); } catch (_) {
+            el.dispatchEvent(new docView.Event("input", { bubbles: true }));
+          }
+          try { el.dispatchEvent(new docView.KeyboardEvent("keyup", { bubbles: true, cancelable: true, key: ch })); } catch (_) {}
+        }
+        if (setter) setter.call(el, str);
+        else el.value = str;
+        el.dispatchEvent(new docView.Event("input", { bubbles: true }));
+        el.dispatchEvent(new docView.Event("change", { bubbles: true }));
+        el.dispatchEvent(new docView.Event("blur", { bubbles: true }));
+        return true;
+      };
+
+      // Card Number
+      const numInput = doc.querySelector(
+        '#cardNumber, input[name="cardNumber"], input.input-card-number, input[data-maska*="#### ####"], input[autocomplete="cc-number"], input[placeholder*="0000 0000"]'
+      ) || Array.from(doc.querySelectorAll('input:not([type="hidden"])')).find((el) => {
+        const s = `${el.id} ${el.name} ${el.className} ${el.placeholder || ""}`.toLowerCase();
+        return /card.*(?:number|no|num|digits)|លេខកាត/i.test(s) && !/cvv|cvc|exp|month|year/i.test(s);
+      });
+      if (numInput) {
+        if (fillInput(numInput, "4286 0900 0000 0206")) {
+          result.filled++;
+          result.details.push("Card Number");
+        }
+      }
+
+      // Expiration Date
+      const expInput = doc.querySelector(
+        '#cardExp, input[name="cardExp"], input.input-card-expired, input[data-maska*="## / ##"], input[data-maska*="##/##"], input[autocomplete="cc-exp"], input[placeholder*="MM / YY" i], input[placeholder*="MM/YY" i]'
+      ) || Array.from(doc.querySelectorAll('input:not([type="hidden"])')).find((el) => {
+        const s = `${el.id} ${el.name} ${el.className} ${el.placeholder || ""}`.toLowerCase();
+        return /card.*exp|expiry|expiration|ផុតកំណត់/i.test(s) && !/cvv|cvc|number/i.test(s);
+      });
+      if (expInput) {
+        const maska = (expInput.getAttribute("data-maska") || "").toLowerCase();
+        const ph = (expInput.getAttribute("placeholder") || "").toLowerCase();
+        const expVal = (maska.includes(" / ") || ph.includes(" / ") || maska.includes("## / ##")) ? "04 / 30" : "04/30";
+        if (fillInput(expInput, expVal)) {
+          result.filled++;
+          result.details.push("Expiration Date");
+        }
+      }
+
+      // CVV / CVC
+      const cvvInput = doc.querySelector(
+        '#cvv2, input[name="cvv2"], #cvv, input[name="cvv"], #cvc, input[name="cvc"], input.input-card-cvv, input[autocomplete="cc-csc"], input[autocomplete="cc-cvv"]'
+      ) || Array.from(doc.querySelectorAll('input:not([type="hidden"])')).find((el) => {
+        const s = `${el.id} ${el.name} ${el.className} ${el.placeholder || ""}`.toLowerCase();
+        return /cvv|cvc|csc|security.*code|កូដសុវត្ថិភាព/i.test(s);
+      });
+      if (cvvInput) {
+        if (fillInput(cvvInput, "777")) {
+          result.filled++;
+          result.details.push("CVV");
+        }
+      }
+
+      // Cardholder
+      const holderInput = doc.querySelector(
+        '#cardHolder, input[name="cardHolder"], #cardName, input[name="cardName"], input[autocomplete="cc-name"]'
+      );
+      if (holderInput) {
+        if (fillInput(holderInput, "Visa Card")) {
+          result.filled++;
+          result.details.push("Cardholder Name");
+        }
+      }
+
+      // Payment Option (Cards radio)
+      const cardRadio = doc.querySelector(
+        'input[type="radio"][value="cards"], input[type="radio"]#cards, input[type="radio"][name="aba_checkout_payment_option"][value="cards"], input[type="radio"][name="payment_option"][value="cards"]'
+      ) || Array.from(doc.querySelectorAll('input[type="radio"]')).find((r) => /cards|credit|visa/i.test(`${r.name} ${r.value} ${r.id}`));
+      if (cardRadio && !cardRadio.checked) {
+        cardRadio.checked = true;
+        cardRadio.dispatchEvent(new win.Event("change", { bubbles: true }));
+        cardRadio.dispatchEvent(new win.Event("click", { bubbles: true }));
+        result.filled++;
+        result.details.push("Payment Option (Cards)");
+      }
+
+      if (result.filled > 0) return result;
+    }
+
+    return null;
+  };
+
+  // Step 1: Query all frame IDs if webNavigation is available
+  let frameIds = [0];
+  if (chrome.webNavigation && chrome.webNavigation.getAllFrames) {
+    try {
+      const frames = await chrome.webNavigation.getAllFrames({ tabId });
+      if (frames && frames.length) {
+        frameIds = frames.map((f) => f.frameId);
+      }
+    } catch (_) {}
+  }
+
+  // Step 2: Execute directFrameExecutor frame by frame (protects against sandboxed frame errors)
+  for (const fid of frameIds) {
+    try {
+      const [execRes] = await chrome.scripting.executeScript({
+        target: { tabId, frameIds: [fid] },
+        func: directFrameExecutor,
+        args: [message],
+      });
+      if (execRes && execRes.result) {
+        frameResults.push(execRes.result);
+      }
+    } catch (_) {
+      // Sandboxed or restricted frame — skip safely
+    }
+  }
+
+  // Step 3: If no frame results found, attempt allFrames: true as fallback
+  if (!frameResults.length) {
+    try {
+      const raw = await chrome.scripting.executeScript({
+        target: { tabId, allFrames: true },
+        func: directFrameExecutor,
+        args: [message],
+      });
+      if (raw && raw.length) {
+        frameResults = raw.map((r) => r.result).filter(Boolean);
+      }
+    } catch (_) {}
+  }
+
+  // Step 4: Fallback to chrome.tabs.sendMessage if executeScript returned no results
+  if (!frameResults.length) {
+    try {
+      const msgRes = await chrome.tabs.sendMessage(tabId, message);
+      if (msgRes) frameResults.push(msgRes);
+    } catch (_) {}
+  }
+
+  return frameResults;
 }
 
 async function sendToPage(message) {
@@ -77,7 +287,66 @@ async function sendToPage(message) {
     throw new Error("This page can't be filled (browser/system page).");
   }
   await ensureInjected(tab.id);
-  return await chrome.tabs.sendMessage(tab.id, message);
+
+  const frameResults = await executeOnAllFrames(tab.id, message);
+  if (!frameResults || !frameResults.length) {
+    throw new Error("No response from page.");
+  }
+
+  if (message.action === "fill" || message.action === "fillVisa") {
+    let totalFilled = 0;
+    let totalSkipped = 0;
+    let details = [];
+    for (const r of frameResults) {
+      if (r && (r.filled !== undefined || r.ok)) {
+        totalFilled += r.filled || 0;
+        totalSkipped += r.skipped || 0;
+        if (Array.isArray(r.details)) {
+          details.push(...r.details);
+        }
+      }
+    }
+    if (details.length && typeof details[0] === "string") {
+      details = Array.from(new Set(details));
+    }
+    return { ok: true, filled: totalFilled, skipped: totalSkipped, details };
+  }
+
+  if (message.action === "scan" || message.action === "suggest") {
+    let totalCount = 0;
+    let allFields = [];
+    for (const r of frameResults) {
+      if (r && r.fields) {
+        totalCount += r.count || r.fields.length;
+        allFields.push(...r.fields);
+      }
+    }
+    return { ok: true, count: totalCount, fields: allFields };
+  }
+
+  if (message.action === "applySuggestions") {
+    let totalFilled = 0;
+    let totalSkipped = 0;
+    for (const r of frameResults) {
+      if (r && r.filled !== undefined) {
+        totalFilled += r.filled || 0;
+        totalSkipped += r.skipped || 0;
+      }
+    }
+    return { ok: true, filled: totalFilled, skipped: totalSkipped };
+  }
+
+  if (message.action === "clear") {
+    let totalCleared = 0;
+    for (const r of frameResults) {
+      if (r && r.cleared !== undefined) {
+        totalCleared += r.cleared || 0;
+      }
+    }
+    return { ok: true, cleared: totalCleared };
+  }
+
+  return frameResults[0];
 }
 
 function setStatus(text, kind) {
@@ -160,30 +429,32 @@ async function doFill(mode) {
     try {
       const res = await fillMistiForm(tab, mode, file, fnName, formHash);
       if (res && res.ok) {
+        let msg = "";
         if (isSSI145) {
           const eq = (res.filled && res.filled.equipmentTypes) ? res.filled.equipmentTypes.length : 0;
-          setStatus(
-            `Filled applicant, location, owner/representative, attachments${eq ? `, and ${eq} equipment type(s)` : ""}.`,
-            "good"
-          );
+          msg = `Filled applicant, location, owner/representative, attachments${eq ? `, and ${eq} equipment type(s)` : ""}.`;
         } else {
           const { fields = 0, attachments = 0, locations = 0, lists = 0 } = (res && res.filled) || {};
           const formName = res && res.formHash ? ` [${res.formHash}]` : "";
-          setStatus(
-            `Filled${formName} ${fields} field(s), ${attachments} attachment(s), ${locations} location block(s), ${lists} list row(s).`,
-            "good"
-          );
+          msg = `Filled${formName} ${fields} field(s), ${attachments} attachment(s), ${locations} location block(s), ${lists} list row(s).`;
         }
+
+        // If a card modal or payment iframe is also open on the page, fill that too
+        try {
+          const cardRes = await sendToPage({
+            action: "fillVisa",
+            overwrite: $("#overwrite").checked,
+          });
+          if (cardRes && cardRes.filled > 0) {
+            msg += ` + ${cardRes.filled} card field(s).`;
+          }
+        } catch (_) {}
+
+        setStatus(msg, "good");
         return;
-      }
-      if (formHash) {
-        throw new Error((res && res.error) || "No response from page.");
       }
     } catch (e) {
-      if (formHash) {
-        setStatus(e.message, "bad");
-        return;
-      }
+      console.warn("MISTI form adapter skipped, falling back to universal autofill:", e);
     }
   }
 
@@ -213,8 +484,54 @@ async function doFill(mode) {
   }
 }
 
+async function doFillVisa() {
+  setStatus("Filling Visa card…");
+  $("#scanOut").hidden = true;
+
+  try {
+    let res = await sendToPage({
+      action: "fillVisa",
+      overwrite: $("#overwrite").checked,
+    });
+
+    // Check if actual card inputs (number, exp, cvv) were filled.
+    // If only a radio button was selected (e.g. payment_option='cards') or 0 fields were filled,
+    // the ABA PayWay iframe may still be mounting. Wait 500ms and retry.
+    const hasActualCardDetails = res && res.details && res.details.some((d) =>
+      /number|exp|cvv/i.test(typeof d === "string" ? d : d.field || "")
+    );
+
+    if (!hasActualCardDetails) {
+      await new Promise((r) => setTimeout(r, 750));
+      const retryRes = await sendToPage({
+        action: "fillVisa",
+        overwrite: $("#overwrite").checked,
+      });
+      if (retryRes && retryRes.filled > 0) {
+        res = {
+          ok: true,
+          filled: (res && res.filled ? res.filled : 0) + (retryRes.filled || 0),
+          skipped: retryRes.skipped || 0,
+          details: Array.from(new Set([...((res && res.details) || []), ...((retryRes && retryRes.details) || [])])),
+        };
+      }
+    }
+
+    if (!res || !res.ok) throw new Error((res && res.error) || "No response from page.");
+    if (!res.filled) {
+      setStatus("No Visa / card form fields found on this page.", "bad");
+    } else {
+      const details = res.details && res.details.length ? ` (${res.details.join(", ")})` : "";
+      setStatus(`Filled ${res.filled} Visa card field(s)${details}.`, "good");
+    }
+  } catch (e) {
+    setStatus(e.message, "bad");
+  }
+}
+
 $("#fillProfile").addEventListener("click", () => doFill("profile"));
 $("#fillTest").addEventListener("click", () => doFill("test"));
+$("#fillVisa").addEventListener("click", () => doFillVisa());
 
 $("#clear").addEventListener("click", async () => {
   setStatus("Clearing…");

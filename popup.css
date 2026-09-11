@@ -144,6 +144,32 @@ body {
   background: var(--accent-press);
   border-color: var(--accent-press);
 }
+.btn-visa {
+  width: 100%;
+  margin-top: 8px;
+  background: #1434cb;
+  border-color: #0f2799;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 12px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.btn-visa:hover {
+  background: #0f2799;
+  border-color: #0c1f7a;
+}
+.btn-visa:active {
+  background: #0a1860;
+}
+.visa-icon {
+  flex-shrink: 0;
+  border-radius: 2px;
+  display: block;
+}
 .btn-danger {
   width: 100%;
   margin-top: 10px;

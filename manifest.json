@@ -1,9 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Bampenh",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "description": "Auto-fill any web form with your saved data or generated test data. Handles text, selects, radios, checkboxes, dates, and React/Vue-controlled inputs.",
-  "permissions": ["activeTab", "scripting", "storage"],
+  "permissions": ["activeTab", "scripting", "storage", "webNavigation"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "all_frames": true,
+      "match_about_blank": true,
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Universal Form Autofill"

@@ -922,23 +922,22 @@
 
   /* --------------------------- file uploads ----------------------------- */
 
-  // We can't read a file off the user's disk, so we synthesize a tiny, valid
-  // placeholder and hand it to the input. The upload widgets in these portals
-  // (form-file) wrap a real <input type="file"> and run their upload-to-server
-  // handler on `change`, so assigning .files + firing change drives the same
-  // flow a manual pick would.
+  // We synthesize valid sample files (sample.pdf for generic/document uploads,
+  // and sample.png for inputs specifically validating image formats) and hand
+  // them to file upload inputs.
 
-  // 1x1 transparent PNG.
-  const PNG_1PX_B64 =
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+  const SAMPLE_PDF =
+    "%PDF-1.4\n" +
+    "1 0 obj\n<</Type/Catalog/Pages 2 0 R>>\nendobj\n" +
+    "2 0 obj\n<</Type/Pages/Kids[3 0 R]/Count 1>>\nendobj\n" +
+    "3 0 obj\n<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>\nendobj\n" +
+    "4 0 obj\n<</Length 55>>\nstream\nBT\n/F1 24 Tf\n100 700 Td\n(Sample PDF Document - Bampenh) Tj\nET\nendstream\nendobj\n" +
+    "5 0 obj\n<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>\nendobj\n" +
+    "xref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000266 00000 n \n0000000372 00000 n \n" +
+    "trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n462\n%%EOF";
 
-  // Smallest practical single-page PDF.
-  const MINIMAL_PDF =
-    "%PDF-1.1\n" +
-    "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n" +
-    "2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n" +
-    "3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 300]>>endobj\n" +
-    "trailer<</Root 1 0 R>>\n%%EOF";
+  const PNG_B64 =
+    "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";
 
   const b64ToBytes = (b64) => {
     const bin = atob(b64);
@@ -947,40 +946,27 @@
     return bytes;
   };
 
-  // A short, unguessable token used to make every synthesized file unique, so
-  // we never hand the same bytes/name to the server twice.
-  const randToken = () =>
-    (Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(0, 12);
-
-  // Build a placeholder File whose type/extension respects the input's `accept`
-  // and whose name is derived from the field's label so it's recognizable. Both
-  // the name and the bytes carry a random token so no two uploads are identical
-  // — portals that dedupe by filename or content hash see a fresh file each time.
-  const makeSampleFile = (el) => {
-    const accept = (el.getAttribute("accept") || "").toLowerCase();
-    const wantsImage = /image\/|\.png|\.jpe?g|\.gif|\.webp|\.bmp/.test(accept);
-    const token = randToken();
-    const base =
-      (describeField(el)[0] || el.name || el.id || "sample")
-        .toString()
-        .trim()
-        .replace(/\s+/g, "_")
-        .replace(/[^\w.-]/g, "")
-        .slice(0, 40) || "sample";
-    if (wantsImage) {
-      // Append the token after IEND; decoders stop at IEND so the image stays
-      // valid while the file's bytes (and hash) differ every time.
-      const png = b64ToBytes(PNG_1PX_B64);
-      const tag = new TextEncoder().encode(`\n${token}`);
-      const bytes = new Uint8Array(png.length + tag.length);
-      bytes.set(png, 0);
-      bytes.set(tag, png.length);
-      return new File([bytes], `${base}_${token}.png`, { type: "image/png" });
+  const isImageTarget = (el) => {
+    if (!el) return false;
+    const accept = (el.getAttribute("accept") || "").trim().toLowerCase();
+    if (accept) {
+      const allowsPdf = accept.includes("pdf") || accept.includes("*/*") || accept.includes("application/*");
+      const requiresImage = /image\/|\.png|\.jpe?g|\.gif|\.webp|\.bmp/.test(accept);
+      if (requiresImage && !allowsPdf) return true;
+      if (allowsPdf) return false;
     }
-    // PDF comments (lines starting with %) are ignored by readers, so the token
-    // is a valid, invisible payload that still changes the bytes.
-    const pdf = MINIMAL_PDF.replace("%%EOF", `%${token}\n%%EOF`);
-    return new File([new Blob([pdf])], `${base}_${token}.pdf`, { type: "application/pdf" });
+    const desc = (describeField(el)[0] || el.name || el.id || el.getAttribute("aria-label") || "").toLowerCase();
+    return /^(?:photo|owner_photo|representative_photo|avatar|profile_picture|រូបថត)$/i.test(desc) || /\b(avatar|owner_photo)\b/i.test(desc);
+  };
+
+  // Build a sample file (sample.png for image fields, sample.pdf for document fields).
+  const makeSampleFile = (el) => {
+    if (el && isImageTarget(el)) {
+      return new File([b64ToBytes(PNG_B64)], "sample.png", { type: "image/png" });
+    }
+    return new File([new Blob([SAMPLE_PDF], { type: "application/pdf" })], "sample.pdf", {
+      type: "application/pdf",
+    });
   };
 
   const fillFileInput = (el) => {

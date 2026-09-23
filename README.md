@@ -1,11 +1,11 @@
 # Bampenh (បំពេញ) — Universal Form Autofill
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome_Extension-Manifest_V3-4285F4?logo=googlechrome&logoColor=white)](manifest.json)
-[![Version](https://img.shields.io/badge/version-2.2.0-indigo.svg)](manifest.json)
+[![Version](https://img.shields.io/badge/version-2.3.0-indigo.svg)](manifest.json)
 [![Platform](https://img.shields.io/badge/platform-Chromium_|_Chrome_|_Edge_|_Brave-blue.svg)](#installation)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](#license)
 
-**Bampenh** (*Khmer: បំពេញ — "to fill" or "to complete"*) is a high-precision, framework-aware Chrome extension designed to streamline form filling and end-to-end testing across modern web applications. 
+**Bampenh** (*Khmer: បំពេញ — "to fill" or "to complete"*) is a high-precision, framework-aware Chrome extension designed to streamline form filling and end-to-end testing across modern web applications.
 
 Unlike standard autofill tools that rely on plain DOM assignments (`el.value = ...`), Bampenh operates across prototype value setters and synthetic event pipelines, ensuring full compatibility with reactive front-end frameworks like **React**, **Vue 2/3**, and **Angular**. Additionally, Bampenh ships with comprehensive, schema-verified integration for **all 45 public service portal forms** within the Ministry of Industry, Science, Technology & Innovation (MISTI) system.
 
@@ -51,26 +51,28 @@ Unlike standard autofill tools that rely on plain DOM assignments (`el.value = .
 ```
 
 ### 1. Isolated Content Script (`content.js`)
+
 For general web forms, Bampenh injects an isolated content script on demand. Modern SPA libraries override standard HTML input setters; Bampenh queries `Object.getOwnPropertyDescriptor` from the element's prototype, sets values directly, and dispatches native events so internal state models synchronize instantly.
 
 ### 2. Main World Reactive Adapters (`forms/misti-*.js`)
+
 Enterprise portals such as MISTI draft applications feature dynamic Khmer-language forms, complex multi-step state machines, and watched cascade resets. Bampenh injects lightweight adapters directly into Chrome's `MAIN` world to communicate directly with root Vue components (`comp.data.application` and `comp.data.applicant`), guaranteeing 100% fill fidelity without brittle DOM queries.
 
 ---
 
 ## Supported Controls
 
-| Control Type | Supported Elements | Matching & Filling Mechanism |
-| :--- | :--- | :--- |
-| **Textual Inputs** | `text`, `email`, `tel`, `url`, `number`, `password`, `search` | Prototype setter + `InputEvent` dispatch |
-| **Multiline Text** | `<textarea>`, `[contenteditable="true"]` | Textarea setter / Range insertion |
-| **Dropdowns** | Standard `<select>`, custom comboboxes, `.csel` | Fuzzy matching against option text and values |
-| **Selections** | `checkbox`, `radio` groups | Boolean parsing and radio-group resolution |
-| **Payment Cards** | `cardnumber`, `ccexp`, `expmonth`, `expyear`, `cvv`, `cardholder`, brand | Card number (single/spaced/split), expiration formats, CVV, and brand resolution |
-| **Date & Time** | `date`, `datetime-local`, `month`, `week`, `time` | ISO standard formatting & date-picker integration |
-| **Attachments** | Standard file inputs (`<input type="file">`), upload widgets | Synthetic valid PDF/PNG data payloads |
-| **Hierarchies** | Khmer administrative address cascades | Sequential async cascading with watcher settling |
-| **Dynamic Lists**| Repeated tables, dynamic equipment cards, factory lists | Schema discovery using component factory methods |
+| Control Type             | Supported Elements                                                                   | Matching & Filling Mechanism                                                     |
+| :----------------------- | :----------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
+| **Textual Inputs** | `text`, `email`, `tel`, `url`, `number`, `password`, `search`          | Prototype setter +`InputEvent` dispatch                                        |
+| **Multiline Text** | `<textarea>`, `[contenteditable="true"]`                                         | Textarea setter / Range insertion                                                |
+| **Dropdowns**      | Standard`<select>`, custom comboboxes, `.csel`                                   | Fuzzy matching against option text and values                                    |
+| **Selections**     | `checkbox`, `radio` groups                                                       | Boolean parsing and radio-group resolution                                       |
+| **Payment Cards**  | `cardnumber`, `ccexp`, `expmonth`, `expyear`, `cvv`, `cardholder`, brand | Card number (single/spaced/split), expiration formats, CVV, and brand resolution |
+| **Date & Time**    | `date`, `datetime-local`, `month`, `week`, `time`                          | ISO standard formatting & date-picker integration                                |
+| **Attachments**    | Standard file inputs (`<input type="file">`), upload widgets                       | Synthetic valid PDF/PNG data payloads                                            |
+| **Hierarchies**    | Khmer administrative address cascades                                                | Sequential async cascading with watcher settling                                 |
+| **Dynamic Lists**  | Repeated tables, dynamic equipment cards, factory lists                              | Schema discovery using component factory methods                                 |
 
 ---
 
@@ -94,18 +96,21 @@ Enterprise portals such as MISTI draft applications feature dynamic Khmer-langua
 ## User Guide
 
 ### 1. Quick Test Fill
+
 1. Open any web form or MISTI portal draft application.
 2. Click the **Bampenh** extension icon.
 3. On the **Fill** tab, click **Fill with test data**.
 4. The extension will automatically populate all required fields, locations, and attachments with realistic sample values.
 
 ### 2. Custom Profile Fill
+
 1. Navigate to the **Your data** tab in the extension popup.
 2. Enter your custom JSON configuration (or click **Load sample** to start with a template).
 3. Click **Save**.
 4. Return to the **Fill** tab and click **Fill from your data**.
 
 ### 3. Visa Card Autofill
+
 1. Open any payment, checkout, or billing form.
 2. Click the **Bampenh** extension icon.
 3. On the **Fill** tab, click the dedicated **Fill Visa Card** button.
@@ -118,12 +123,14 @@ Enterprise portals such as MISTI draft applications feature dynamic Khmer-langua
 5. Card fields are also automatically filled when using **Fill with test data** or **Fill from your data** whenever card forms are encountered.
 
 ### 4. Page Analysis & Field Suggestions
+
 1. Switch to the **Suggest** tab.
 2. Click **Analyze this page**.
 3. Bampenh will inspect every fillable element in the current DOM and present proposed values for review.
 4. Adjust any field value inline and click **Apply all**.
 
 ### 5. Overwrite Protection
+
 By default, Bampenh does not overwrite fields that already contain values. Check the **"Overwrite fields that already have a value"** checkbox if you wish to force a complete re-fill.
 
 ---
@@ -152,14 +159,14 @@ Selectors specified under `__selectors__` execute with highest priority before f
 
 Bampenh includes complete sample definitions, conditional rules, and adapters for **all 45 official service forms** across the following directorates:
 
-| Directorate | Acronym | Description | Forms Covered |
-| :--- | :--- | :--- | :--- |
-| **General Department of Industry** | `GD_IND` | Industrial operations, permits, expansions, inspections | `GD_IND_SSI145`, `GD_IND_FORM_OPT193`, `GD_IND_FORM_BRH482`, `GD_IND_SWI385`, `GD_IND_CLF021`, `GD_IND_FORM_REG483`, `GD_IND_FORM_SOR005`, `GD_IND_FORM_TRN095`, `GD_IND_FORM_JKQ284`, `GD_IND_FORM_KQL581` |
-| **Institute of Standards of Cambodia** | `ISC` | Product certifications, safety marks, licenses | `ISC_FORM_CBP160`, `ISC_FORM_CFS143`, `ISC_FORM_AEM152`, `ISC_FORM_AAH158`, `ISC_FORM_HOT143`, `ISC_FORM_KOI145`, `ISC_FORM_LIC147`, `ISC_FORM_COM140`, `ISC_FORM_DEK126`, `ISC_FORM_RCL146`, `ISC_FORM_RVC153`, `ISC_FORM_ASM284`, etc. |
-| **National Metrology Center** | `NMC` | Verification, calibration, instrument patterns | `NMC_FORM_CAV168`, `NMC_FORM_CCV888`, `NMC_FORM_KMQ279`, `NMC_FORM_REG332`, `NMC_FORM_SSP228`, `NMC_FORM_SSP337` |
-| **Department of Potable Water** | `GD_WAT` | Water supply licensing, expansions | `GD_WAT_FORM_SLP235`, `GD_WAT_FORM_WBL605`, `GD_WAT_FORM_WOC630` |
-| **SME & Handicraft Department** | `GD_SMEH` | SME registrations, craft modifications | `GD_SMEH_FORM_JKG168`, `GD_SMEH_FORM_KQP429`, `GD_SMEH_FORM_BHG197`, `GD_SMEH_FORM_RRB826` |
-| **Science, Technology & Innovation** | `STINL` | Laboratory testing, technical assessments | `STINL_FORM_KJL428`, `GD_AC_FORM_JGH097` |
+| Directorate                                  | Acronym     | Description                                             | Forms Covered                                                                                                                                                                                                                                                    |
+| :------------------------------------------- | :---------- | :------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **General Department of Industry**     | `GD_IND`  | Industrial operations, permits, expansions, inspections | `GD_IND_SSI145`, `GD_IND_FORM_OPT193`, `GD_IND_FORM_BRH482`, `GD_IND_SWI385`, `GD_IND_CLF021`, `GD_IND_FORM_REG483`, `GD_IND_FORM_SOR005`, `GD_IND_FORM_TRN095`, `GD_IND_FORM_JKQ284`, `GD_IND_FORM_KQL581`                                  |
+| **Institute of Standards of Cambodia** | `ISC`     | Product certifications, safety marks, licenses          | `ISC_FORM_CBP160`, `ISC_FORM_CFS143`, `ISC_FORM_AEM152`, `ISC_FORM_AAH158`, `ISC_FORM_HOT143`, `ISC_FORM_KOI145`, `ISC_FORM_LIC147`, `ISC_FORM_COM140`, `ISC_FORM_DEK126`, `ISC_FORM_RCL146`, `ISC_FORM_RVC153`, `ISC_FORM_ASM284`, etc. |
+| **National Metrology Center**          | `NMC`     | Verification, calibration, instrument patterns          | `NMC_FORM_CAV168`, `NMC_FORM_CCV888`, `NMC_FORM_KMQ279`, `NMC_FORM_REG332`, `NMC_FORM_SSP228`, `NMC_FORM_SSP337`                                                                                                                                     |
+| **Department of Potable Water**        | `GD_WAT`  | Water supply licensing, expansions                      | `GD_WAT_FORM_SLP235`, `GD_WAT_FORM_WBL605`, `GD_WAT_FORM_WOC630`                                                                                                                                                                                           |
+| **SME & Handicraft Department**        | `GD_SMEH` | SME registrations, craft modifications                  | `GD_SMEH_FORM_JKG168`, `GD_SMEH_FORM_KQP429`, `GD_SMEH_FORM_BHG197`, `GD_SMEH_FORM_RRB826`                                                                                                                                                               |
+| **Science, Technology & Innovation**   | `STINL`   | Laboratory testing, technical assessments               | `STINL_FORM_KJL428`, `GD_AC_FORM_JGH097`                                                                                                                                                                                                                     |
 
 ---
 
